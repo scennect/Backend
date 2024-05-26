@@ -1,0 +1,56 @@
+<a href="/oauth2/authorization/google">Google Login</a><br>
+
+<!--<!DOCTYPE html>-->
+<!--<html>-->
+<!--<head>-->
+<!--    <title>Mouse Tracker</title>-->
+<!--    <style>-->
+<!--        #pointer {-->
+<!--            position: absolute;-->
+<!--            width: 20px;-->
+<!--            height: 20px;-->
+<!--            background-color: red;-->
+<!--            border-radius: 50%;-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div id="pointer"></div>-->
+<!--<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>-->
+<!--<script>-->
+<!--    $(document).ready(function () {-->
+<!--        var pointer = $("#pointer");-->
+
+<!--        $(document).mousemove(function (event) {-->
+<!--            var mouseX = event.pageX;-->
+<!--            var mouseY = event.pageY;-->
+
+<!--            pointer.css({-->
+<!--                left: mouseX - (pointer.width() / 2),-->
+<!--                top: mouseY - (pointer.height() / 2)-->
+<!--            });-->
+
+<!--            // WebSocket을 통해 마우스 위치 서버로 전송-->
+<!--            sendMousePosition(mouseX, mouseY);-->
+<!--        });-->
+
+<!--        function sendMousePosition(x, y) {-->
+<!--            var mouse = { x: x, y: y };-->
+
+<!--            $.ajax({-->
+<!--                type: "POST",-->
+<!--                url: "/mouse/update",-->
+<!--                contentType: "application/json",-->
+<!--                data: JSON.stringify(mouse),-->
+<!--                success: function () {-->
+<!--                    console.log("Mouse position updated successfully.");-->
+<!--                },-->
+<!--                error: function () {-->
+<!--                    console.error("Failed to update mouse position.");-->
+<!--                }-->
+<!--            });-->
+<!--        }-->
+<!--    });-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
