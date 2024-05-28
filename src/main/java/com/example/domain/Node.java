@@ -1,5 +1,6 @@
 package com.example.domain;
 
+import com.example.websocket.NodePosition;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,6 +40,9 @@ public class Node extends BaseEntity{
     @Builder.Default
     private List<Node> children = new ArrayList<>();
 
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "node")
+    private NodePosition nodePosition;
+
     public void updateUser(User user){
         this.user = user;
     }
@@ -52,5 +56,9 @@ public class Node extends BaseEntity{
 
     public void updateProject(Project project){
         this.project = project;
+    }
+
+    public void updateImageURL(String imageURL){
+        this.imageURL = imageURL;
     }
 }

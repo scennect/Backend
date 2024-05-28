@@ -3,22 +3,31 @@ package com.example.controller;
 import com.example.apiPayload.ApiResponse;
 import com.example.apiPayload.code.status.SuccessStatus;
 import com.example.apiPayload.exception.GeneralException;
+import com.example.domain.Node;
 import com.example.dto.request.NodeRequestDTO;
 import com.example.dto.response.NodeResponseDTO;
 import com.example.jwt.JWTUtil;
 import com.example.service.ImageService;
 import com.example.service.NodeService;
+import com.example.service.ProjectService;
+import com.example.websocket.NodePosition;
+import com.example.websocket.NodePositionDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
-import static com.example.apiPayload.code.status.ErrorStatus.IMAGE_UPLOAD_FAILURE;
 
 @RestController
 @RequiredArgsConstructor
+@Transactional
 @Slf4j
 public class NodeController {
 
@@ -27,28 +36,37 @@ public class NodeController {
     private final JWTUtil jwtUtil;
 
     @PostMapping("/new-node")
-    public ApiResponse<String> newNode(@RequestPart("nodeRequestDto") NodeRequestDTO nodeRequestDto,
-                                       @RequestPart("imageFile") MultipartFile imageFile,
+    public ApiResponse<String> newNode(@RequestBody NodeRequestDTO nodeRequestDto,
                                        @CookieValue(value = "Authorization", required = false) String Authorization) {
-        try{
+        try {
             String username = jwtUtil.getUsername(Authorization);
             nodeRequestDto.setUsername(username);
         } catch (IllegalArgumentException e) {
             log.info("not logged in user");
         }
 
-        try {
-            String s3Url = imageService.imageUpload(imageFile);
-            nodeRequestDto.setImageURL(s3Url);
+        Long saveNodeId = nodeService.saveNode(nodeRequestDto);
+        String text = nodeRequestDto.getText();
 
-        } catch (IOException e) {
-            throw new GeneralException(IMAGE_UPLOAD_FAILURE);
-        }
+        String imageURL = imageService.generateImage(text);
+        nodeService.updateNodeImageURL(saveNodeId, imageURL);
 
-        nodeService.saveNode(nodeRequestDto);
         return ApiResponse.onSuccess(SuccessStatus.CREATED.getCode(), SuccessStatus.CREATED.getMessage(), "New node created");
     }
 
+    @MessageMapping("/moveNode")
+    @SendTo("/topic/nodes")
+    public NodePositionDTO updateNode(@Payload NodePositionDTO nodePositionDTO) {
 
+        nodeService.updateNodePosition(nodePositionDTO);
+
+        return nodePositionDTO;
+    }
+
+    // '/api/nodes?projectId=1' 형식
+    @GetMapping("/api/nodes")
+    public List<Node> getNodes(@RequestParam Long projectId) {
+        return nodeService.getNodesByProjectId(projectId);
+    }
 
 }

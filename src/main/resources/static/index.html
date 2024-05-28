@@ -1,56 +1,20 @@
-<a href="/oauth2/authorization/google">Google Login</a><br>
-
-<!--<!DOCTYPE html>-->
-<!--<html>-->
-<!--<head>-->
-<!--    <title>Mouse Tracker</title>-->
-<!--    <style>-->
-<!--        #pointer {-->
-<!--            position: absolute;-->
-<!--            width: 20px;-->
-<!--            height: 20px;-->
-<!--            background-color: red;-->
-<!--            border-radius: 50%;-->
-<!--        }-->
-<!--    </style>-->
-<!--</head>-->
-<!--<body>-->
-<!--<div id="pointer"></div>-->
-<!--<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>-->
-<!--<script>-->
-<!--    $(document).ready(function () {-->
-<!--        var pointer = $("#pointer");-->
-
-<!--        $(document).mousemove(function (event) {-->
-<!--            var mouseX = event.pageX;-->
-<!--            var mouseY = event.pageY;-->
-
-<!--            pointer.css({-->
-<!--                left: mouseX - (pointer.width() / 2),-->
-<!--                top: mouseY - (pointer.height() / 2)-->
-<!--            });-->
-
-<!--            // WebSocket을 통해 마우스 위치 서버로 전송-->
-<!--            sendMousePosition(mouseX, mouseY);-->
-<!--        });-->
-
-<!--        function sendMousePosition(x, y) {-->
-<!--            var mouse = { x: x, y: y };-->
-
-<!--            $.ajax({-->
-<!--                type: "POST",-->
-<!--                url: "/mouse/update",-->
-<!--                contentType: "application/json",-->
-<!--                data: JSON.stringify(mouse),-->
-<!--                success: function () {-->
-<!--                    console.log("Mouse position updated successfully.");-->
-<!--                },-->
-<!--                error: function () {-->
-<!--                    console.error("Failed to update mouse position.");-->
-<!--                }-->
-<!--            });-->
-<!--        }-->
-<!--    });-->
-<!--</script>-->
-<!--</body>-->
-<!--</html>-->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real-time Collaboration</title>
+    <script src="https://cdn.jsdelivr.net/sockjs/1.1.4/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
+    <style>
+        #canvas { width: 100%; height: 100vh; position: relative; }
+        .node { position: absolute; border: 1px solid #000; padding: 5px; background: #fff; }
+    </style>
+</head>
+<body>
+<div id="canvas"></div>
+<script>
+    // 여기에 실제 프로젝트 ID를 설정하거나 동적으로 받아옵니다.
+    const projectId = 1; // 예시로 프로젝트 ID를 1로 설정
+</script>
+<script src="app.js"></script>
+</body>
+</html>

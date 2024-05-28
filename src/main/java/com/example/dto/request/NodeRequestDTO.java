@@ -11,7 +11,6 @@ public class NodeRequestDTO {
 
     private String username;
     private String text;
-    private String imageURL;
     private Long parentNodeId;
     private Long projectId;
 }

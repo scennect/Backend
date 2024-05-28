@@ -80,6 +80,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/", "/login","/new-node", "/project/**").permitAll()
                         .requestMatchers("/mypage", "/new-project", "/all-project").hasRole("USER")
+                        .requestMatchers("/api/nodes/**","topic", "app/**" , "/ws/**").permitAll()
                         .anyRequest().authenticated());
 
         //세션 설정 : STATELESS

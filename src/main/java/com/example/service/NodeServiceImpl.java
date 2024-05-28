@@ -10,11 +10,15 @@ import com.example.dto.response.NodeResponseDTO;
 import com.example.repository.NodeRepository;
 import com.example.repository.ProjectRepository;
 import com.example.repository.UserRepository;
+import com.example.websocket.NodePosition;
+import com.example.websocket.NodePositionDTO;
+import com.example.websocket.NodePositionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.example.apiPayload.code.status.ErrorStatus.NODE_NOT_CORRECT;
@@ -27,19 +31,19 @@ public class NodeServiceImpl implements NodeService{
     private final NodeRepository nodeRepository;
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
+    private final NodePositionRepository nodePositionRepository;
 
     @Override
-    public void saveNode(NodeRequestDTO nodeRequestDto) {
+    public Long saveNode(NodeRequestDTO nodeRequestDto) {
 
         // check if node is correct
-        if(nodeRequestDto.getText() == null || nodeRequestDto.getImageURL() == null){
+        if(nodeRequestDto.getText() == null){
             throw new GeneralException(NODE_NOT_CORRECT);
         }
 
         // build new node
         Node newNode = Node.builder()
                 .text(nodeRequestDto.getText())
-                .imageURL(nodeRequestDto.getImageURL())
                 .build();
 
         // check if user is correct
@@ -58,7 +62,7 @@ public class NodeServiceImpl implements NodeService{
 
             newNode.updateProject(checkProject);
             checkProject.updateNode(newNode);
-            projectRepository.save(checkProject);
+            projectRepository.save(checkProject)
         }
 
         // 부모노드 update
@@ -72,7 +76,8 @@ public class NodeServiceImpl implements NodeService{
         }
 
         // save new node
-        nodeRepository.save(newNode);
+        Node saveNode = nodeRepository.save(newNode);
+        return saveNode.getId();
     }
 
     @Override
@@ -103,6 +108,40 @@ public class NodeServiceImpl implements NodeService{
                 .collect(Collectors.toList());
 
         return parentNodes;
+    }
+
+    @Override
+    public Node findById(Long nodeId) {
+        Node node = nodeRepository.findById(nodeId).orElseThrow(()
+                -> new GeneralException(ErrorStatus.NODE_NOT_FOUND));
+        return node;
+    }
+
+    @Override
+    public void updateNodePosition(NodePositionDTO nodePositionDTO) {
+
+        Node foundNode = nodeRepository.findById(nodePositionDTO.getNodeId()).orElseThrow(()
+                -> new GeneralException(ErrorStatus.NODE_NOT_FOUND));
+
+        NodePosition nodePosition = foundNode.getNodePosition();
+        nodePosition.updateX(nodePositionDTO.getX());
+        nodePosition.updateY(nodePositionDTO.getY());
+
+        nodePositionRepository.save(nodePosition);
+    }
+
+    @Override
+    public List<Node> getNodesByProjectId(Long projectId) {
+        Project project = projectRepository.findById(projectId).orElseThrow(()
+                -> new GeneralException(ErrorStatus.PROJECT_NOT_FOUND));
+        return project.getNodes();
+    }
+
+    @Override
+    public void updateNodeImageURL(Long nodeId, String imageURL) {
+        Node node = nodeRepository.findById(nodeId).orElseThrow(()
+                -> new GeneralException(ErrorStatus.NODE_NOT_FOUND));
+        node.updateImageURL(imageURL);
     }
 
 }

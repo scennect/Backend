@@ -1,19 +1,24 @@
 package com.example.service;
 
+import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.example.apiPayload.code.status.ErrorStatus;
+import com.example.apiPayload.exception.GeneralException;
 import com.example.config.S3Config;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartRequest;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
+
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +27,7 @@ import java.util.UUID;
 public class ImageServiceImpl implements ImageService{
 
     private final S3Config s3Config;
+    private final RestTemplate restTemplate;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -55,5 +61,27 @@ public class ImageServiceImpl implements ImageService{
         localFile.delete();
 
         return s3Url;
+    }
+
+    @Override
+    public String generateImage(String text) {
+        String url = "http://localhost:8000/generate-image";  // FastAPI 서버의 URL
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        String requestBody = "{\"text\": \"" + text + "\"}";
+
+        HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
+
+        ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class);
+
+        if (response.getStatusCode() == HttpStatus.OK) {
+            // 응답이 성공적인 경우 이미지 URL을 반환
+            return response.getBody();
+        } else {
+            // 실패한 경우 적절한 처리
+            throw new GeneralException(ErrorStatus.IMAGE_GENERATE_FAILURE);
+        }
     }
 }

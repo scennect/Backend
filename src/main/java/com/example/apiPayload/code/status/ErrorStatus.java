@@ -31,7 +31,7 @@ public enum ErrorStatus implements BaseCode {
     PROJECT_USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "PROJECT_USER4001", "프로젝트 사용자가 아닙니다."),
 
     //image Error
-    IMAGE_UPLOAD_FAILURE(HttpStatus.BAD_REQUEST, "IMAGE4001", "이미지 업로드에 실패했습니다."),
+    IMAGE_GENERATE_FAILURE(HttpStatus.BAD_REQUEST, "IMAGE4001", "이미지 생성에 실패했습니다."),
 
     // Toekn Error
     TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "TOKEN4001", "토큰이 없습니다."),
