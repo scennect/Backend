@@ -39,6 +39,7 @@ public class SecurityConfig {
                         CorsConfiguration corsConfiguration = new CorsConfiguration();
 
                         corsConfiguration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+                        corsConfiguration.setAllowedOrigins(Collections.singletonList("http://localhost:8080"));
                         corsConfiguration.setAllowedMethods(Collections.singletonList("*"));
                         corsConfiguration.setAllowedHeaders(Collections.singletonList("*"));
                         corsConfiguration.setAllowCredentials(true);
@@ -65,15 +66,14 @@ public class SecurityConfig {
 
         //JWTFilter 추가
         http
-                .addFilterBefore(new JWTFilter(jwtUtil), OAuth2LoginAuthenticationFilter.class);
+                .addFilterAfter(new JWTFilter(jwtUtil), OAuth2LoginAuthenticationFilter.class);
 
         //oauth2
         http
                 .oauth2Login((oauth2) -> oauth2
                         .userInfoEndpoint((userInfoEndPoingConfig) -> userInfoEndPoingConfig
-                                        .userService(customOAuth2UserService))
-                        .successHandler(customSuccessHandler)
-                        .failureHandler(customFailureHandler));
+                                .userService(customOAuth2UserService))
+                        .successHandler(customSuccessHandler));
 
         //경로별 인가 작업
         http

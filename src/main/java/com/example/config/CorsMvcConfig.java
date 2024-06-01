@@ -17,8 +17,9 @@ public class CorsMvcConfig implements WebMvcConfigurer {
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                         .allowedHeaders()
                         .exposedHeaders("Set-Cookie")
-                        .allowedOrigins("http://localhost:3000")
-                        .allowedOrigins("http://localhost:8080");
+                        .allowCredentials(true) // 쿠키를 주고 받을 수 있게 설정
+                        .allowedOrigins("http://13.124.8.41", "https://13.124.8.41",
+                                "http://localhost:3000", "http://localhost:8080");
 
             }
         };
