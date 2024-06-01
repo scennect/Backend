@@ -30,7 +30,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         OAuth2Response oAuth2Response = null;
 
         if(registrationId.equals("google")) {
-            System.out.println("구글 로그인 요청");
+//            System.out.println("구글 로그인 요청");
             oAuth2Response = new GoogleResponse(oAuth2User.getAttributes());
         }
         else{

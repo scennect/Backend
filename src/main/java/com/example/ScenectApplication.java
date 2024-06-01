@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class MouseApplication {
+public class ScenectApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(MouseApplication.class, args);
+        SpringApplication.run(ScenectApplication.class, args);
     }
 
 }

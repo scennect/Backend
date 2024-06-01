@@ -1,10 +1,10 @@
-package com.example.mouse;
+package com.example.scenect;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class MouseApplicationTests {
+class ScenectApplicationTests {
 
     @Test
     void contextLoads() {

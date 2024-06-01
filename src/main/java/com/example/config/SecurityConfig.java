@@ -65,7 +65,7 @@ public class SecurityConfig {
 
         //JWTFilter 추가
         http
-                .addFilterAfter(new JWTFilter(jwtUtil), OAuth2LoginAuthenticationFilter.class);
+                .addFilterBefore(new JWTFilter(jwtUtil), OAuth2LoginAuthenticationFilter.class);
 
         //oauth2
         http
@@ -81,6 +81,7 @@ public class SecurityConfig {
                         .requestMatchers("/", "/login","/new-node", "/project/**").permitAll()
                         .requestMatchers("/mypage", "/new-project", "/all-project").hasRole("USER")
                         .requestMatchers("/api/nodes/**","topic", "app/**" , "/ws/**").permitAll()
+                        .requestMatchers("/index.html").permitAll()
                         .anyRequest().authenticated());
 
         //세션 설정 : STATELESS

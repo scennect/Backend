@@ -37,13 +37,14 @@ public class NodeServiceImpl implements NodeService{
     public Long saveNode(NodeRequestDTO nodeRequestDto) {
 
         // check if node is correct
-        if(nodeRequestDto.getText() == null){
+        if(nodeRequestDto.getText() == null || nodeRequestDto.getImageURL()==null){
             throw new GeneralException(NODE_NOT_CORRECT);
         }
 
         // build new node
         Node newNode = Node.builder()
                 .text(nodeRequestDto.getText())
+                .imageURL(nodeRequestDto.getImageURL())
                 .build();
 
         // check if user is correct
@@ -62,7 +63,7 @@ public class NodeServiceImpl implements NodeService{
 
             newNode.updateProject(checkProject);
             checkProject.updateNode(newNode);
-            projectRepository.save(checkProject)
+            projectRepository.save(checkProject);
         }
 
         // 부모노드 update
@@ -81,16 +82,18 @@ public class NodeServiceImpl implements NodeService{
     }
 
     @Override
-    public NodeResponseDTO getNodeResponseDTO(Node parentNode) {
+    public NodeResponseDTO getNodeResponseDTO(Node node, Long projectId) {
         NodeResponseDTO nodeResponseDTO = NodeResponseDTO.builder()
-                .id(parentNode.getId())
-                .text(parentNode.getText())
-                .imageURL(parentNode.getImageURL())
+                .id(node.getId())
+                .text(node.getText())
+                .imageURL(node.getImageURL())
                 .build();
 
-        if(!parentNode.getChildren().isEmpty()){
-            parentNode.getChildren().stream().forEach(childNode -> {
-                NodeResponseDTO childNodeResponseDTO = getNodeResponseDTO(childNode);
+        if(!node.getChildren().isEmpty()){
+            node.getChildren().stream().forEach(childNode -> {
+                NodeResponseDTO childNodeResponseDTO = getNodeResponseDTO(childNode, projectId);
+                childNodeResponseDTO.setParentNodeId(node.getId());
+                childNodeResponseDTO.setProjectId(projectId);
                 nodeResponseDTO.addChildResponseDTO(childNodeResponseDTO);
             });
         }
@@ -111,13 +114,6 @@ public class NodeServiceImpl implements NodeService{
     }
 
     @Override
-    public Node findById(Long nodeId) {
-        Node node = nodeRepository.findById(nodeId).orElseThrow(()
-                -> new GeneralException(ErrorStatus.NODE_NOT_FOUND));
-        return node;
-    }
-
-    @Override
     public void updateNodePosition(NodePositionDTO nodePositionDTO) {
 
         Node foundNode = nodeRepository.findById(nodePositionDTO.getNodeId()).orElseThrow(()
@@ -131,17 +127,19 @@ public class NodeServiceImpl implements NodeService{
     }
 
     @Override
-    public List<Node> getNodesByProjectId(Long projectId) {
+    public List<NodeRequestDTO> getNodesByProjectId(Long projectId) {
         Project project = projectRepository.findById(projectId).orElseThrow(()
                 -> new GeneralException(ErrorStatus.PROJECT_NOT_FOUND));
-        return project.getNodes();
+        List<Node> nodes = project.getNodes();
+        List<NodeRequestDTO> collect = nodes.stream().map(node -> {
+            return NodeRequestDTO.builder()
+                    .text(node.getText())
+                    .imageURL(node.getImageURL())
+                    .build();
+        }).collect(Collectors.toList());
+
+        return collect;
     }
 
-    @Override
-    public void updateNodeImageURL(Long nodeId, String imageURL) {
-        Node node = nodeRepository.findById(nodeId).orElseThrow(()
-                -> new GeneralException(ErrorStatus.NODE_NOT_FOUND));
-        node.updateImageURL(imageURL);
-    }
 
 }

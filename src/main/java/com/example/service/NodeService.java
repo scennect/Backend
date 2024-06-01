@@ -11,15 +11,12 @@ public interface NodeService {
 
     public Long saveNode(NodeRequestDTO nodeRequestDto);
 
-    public NodeResponseDTO getNodeResponseDTO(Node firstNode);
+    public NodeResponseDTO getNodeResponseDTO(Node firstNode, Long projectId);
 
     public List<Node> getParentNodes(List<Node> nodes);
 
-    public Node findById(Long nodeId);
-
     public void updateNodePosition(NodePositionDTO nodePositionDTO);
 
-    public List<Node> getNodesByProjectId(Long projectId);
+    public List<NodeRequestDTO> getNodesByProjectId(Long projectId);
 
-    public void updateNodeImageURL(Long nodeId, String imageURL);
 }

@@ -45,11 +45,10 @@ public class NodeController {
             log.info("not logged in user");
         }
 
-        Long saveNodeId = nodeService.saveNode(nodeRequestDto);
-        String text = nodeRequestDto.getText();
+        String imageURL = imageService.generateImage(nodeRequestDto.getText());
+        nodeRequestDto.setImageURL(imageURL);
 
-        String imageURL = imageService.generateImage(text);
-        nodeService.updateNodeImageURL(saveNodeId, imageURL);
+        nodeService.saveNode(nodeRequestDto);
 
         return ApiResponse.onSuccess(SuccessStatus.CREATED.getCode(), SuccessStatus.CREATED.getMessage(), "New node created");
     }
@@ -63,10 +62,11 @@ public class NodeController {
         return nodePositionDTO;
     }
 
-    // '/api/nodes?projectId=1' 형식
+    // /api/nodes?projectId=1 형식으로 요청
     @GetMapping("/api/nodes")
-    public List<Node> getNodes(@RequestParam Long projectId) {
-        return nodeService.getNodesByProjectId(projectId);
+    public ApiResponse<List<NodeRequestDTO>> getNodesByProjectId(@RequestParam("projectId") Long projectId) {
+        List<NodeRequestDTO> nodes = nodeService.getNodesByProjectId(projectId);
+        return ApiResponse.onSuccess(SuccessStatus.OK.getCode(), SuccessStatus.OK.getMessage(), nodes);
     }
 
 }

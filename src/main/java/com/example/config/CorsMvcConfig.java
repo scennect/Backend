@@ -14,12 +14,12 @@ public class CorsMvcConfig implements WebMvcConfigurer {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedMethods("*")
-                        .allowedHeaders("*")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+                        .allowedHeaders()
                         .exposedHeaders("Set-Cookie")
-                        .allowedOrigins("*")
                         .allowedOrigins("http://localhost:3000")
                         .allowedOrigins("http://localhost:8080");
+
             }
         };
     }

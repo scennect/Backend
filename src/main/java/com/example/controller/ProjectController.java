@@ -67,15 +67,15 @@ public class ProjectController {
 
     @GetMapping("/project/{projectId}")
     public ApiResponse<ProjectResponseDTO> node(@CookieValue(value = "Authorization", required = false) String Authorization,
-                                                @PathVariable Long projectId) {
+                                                @PathVariable("projectId") Long projectId) {
 
         Project project = projectService.findProjectById(projectId);
+        String username = jwtUtil.getUsername(Authorization);
 
         // private project 이므로 해당 유저가 project 에 속해있는지 확인
         if (!project.getIsPublic()) {
              //user 정보 가져오기
             try{
-                String username = jwtUtil.getUsername(Authorization);
                 User user = userService.findUserByUsername(username);
 
                 // projectUser 없으면 Error return
@@ -96,8 +96,9 @@ public class ProjectController {
 
         if(!nodes.isEmpty()){
             List<Node> parentNodes = nodeService.getParentNodes(nodes);
-            parentNodes.stream().forEach(node -> {
-                NodeResponseDTO nodeResponseDTO = nodeService.getNodeResponseDTO(node);
+            parentNodes.forEach(node -> {
+                NodeResponseDTO nodeResponseDTO = nodeService.getNodeResponseDTO(node, projectId);
+                nodeResponseDTO.setProjectId(projectId);
                 projectResponseDTO.addNodeResponseDTO(nodeResponseDTO);
             });
         }
