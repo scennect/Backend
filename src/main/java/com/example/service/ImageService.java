@@ -7,7 +7,7 @@ import org.springframework.web.multipart.MultipartRequest;
 import java.io.IOException;
 
 public interface ImageService {
-//    public String imageUpload(MultipartFile imageFile) throws IOException;
+    public String imageUpload(MultipartFile imageFile) throws IOException;
 
     public String generateImage(String text);
 
