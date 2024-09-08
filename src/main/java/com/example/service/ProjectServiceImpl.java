@@ -2,11 +2,11 @@ package com.example.service;
 
 import com.example.apiPayload.code.status.ErrorStatus;
 import com.example.apiPayload.exception.GeneralException;
-import com.example.converter.ProjectConverter;
 import com.example.domain.Node;
 import com.example.domain.Project;
 import com.example.domain.User;
 import com.example.dto.request.ProjectRequestDTO;
+import com.example.dto.request.UpdateProjectRequestDTO;
 import com.example.repository.NodeRepository;
 import com.example.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,22 +29,25 @@ public class ProjectServiceImpl implements ProjectService{
     private final ProjectUserService projectUserService;
 
     @Override
-    public void saveProject(ProjectRequestDTO projectRequestDto) {
+    public void saveProject(ProjectRequestDTO projectRequestDTO) {
         //check if user exists
-        User user = userService.findUserByUsername(projectRequestDto.getUsername());
+        User user = userService.findUserByUsername(projectRequestDTO.getUsername());
 
         // 프로젝트명, 공개여부로 project build
-        Project project = ProjectConverter.toProject(projectRequestDto);
+        Project project = Project.builder()
+                .name(projectRequestDTO.getName())
+                .isPublic(projectRequestDTO.getIsPublic())
+                .build();
 
         // 프로젝트 생성 유저 저장
         projectUserService.saveProjectUser(project, user);
 
         // 팀원 초대 있을 시, 팀원들에 대한 ProjectUser 저장
-        List<String> memberEmails = projectRequestDto.getMemberEmails();
+        List<String> memberEmails = projectRequestDTO.getMemberEmails();
         if(memberEmails != null && !memberEmails.isEmpty()) {
             memberEmails.stream().forEach(memberEmail -> {
                 try {
-                    User member = userService.checkIfUserExistsByEmail(memberEmail);
+                    User member = userService.findUserByEmail(memberEmail);
                     projectUserService.saveProjectUser(project, member);
                 } catch (GeneralException e) {
                     log.info("User not found with email: " + memberEmail);
@@ -53,7 +56,7 @@ public class ProjectServiceImpl implements ProjectService{
         }
 
         // 저장할 노드가 있는 프로젝트
-        List<Long> nodeIds = projectRequestDto.getNodeIds();
+        List<Long> nodeIds = projectRequestDTO.getNodeIds();
         if (!nodeIds.isEmpty()) {
             List<Node> nodesList = nodeIds.stream()
                     .map(nodeId -> nodeRepository.findById(nodeId)
@@ -81,5 +84,9 @@ public class ProjectServiceImpl implements ProjectService{
         return project;
     }
 
+    @Override
+    public void updateProject(Project project) {
+        projectRepository.save(project);
+    }
 
 }

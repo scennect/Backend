@@ -4,22 +4,19 @@ import com.example.apiPayload.ApiResponse;
 import com.example.apiPayload.code.status.SuccessStatus;
 import com.example.apiPayload.exception.GeneralException;
 import com.example.domain.Node;
+import com.example.domain.User;
+import com.example.dto.CustomUserDetails;
 import com.example.dto.request.NodeRequestDTO;
 import com.example.dto.response.NodeResponseDTO;
 import com.example.jwt.JWTUtil;
 import com.example.service.ImageService;
 import com.example.service.NodeService;
-import com.example.service.ProjectService;
-import com.example.websocket.NodePosition;
-import com.example.websocket.NodePositionDTO;
+import com.example.service.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -34,39 +31,29 @@ public class NodeController {
     private final NodeService nodeService;
     private final ImageService imageService;
     private final JWTUtil jwtUtil;
+    private final UserServiceImpl userServiceImpl;
 
     @PostMapping("/new-node")
     public ApiResponse<String> newNode(@RequestBody NodeRequestDTO nodeRequestDto,
-                                       @CookieValue(value = "Authorization", required = false) String Authorization) {
-        try {
-            String username = jwtUtil.getUsername(Authorization);
-            nodeRequestDto.setUsername(username);
-        } catch (IllegalArgumentException e) {
+                                       @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        if(customUserDetails == null){
             log.info("not logged in user");
         }
+        else{
+            nodeRequestDto.setUsername(customUserDetails.getUsername());
+        }
 
-        String imageURL = imageService.generateImage(nodeRequestDto.getText());
+        Long parentNodeId = nodeRequestDto.getParentNodeId();
+        if(parentNodeId != null){
+            nodeService.checkParentNode(nodeRequestDto);
+        }
+
+        String imageURL = imageService.generateImage(nodeRequestDto.getText(), nodeRequestDto.getParentImageURL());
         nodeRequestDto.setImageURL(imageURL);
 
         nodeService.saveNode(nodeRequestDto);
 
         return ApiResponse.onSuccess(SuccessStatus.CREATED.getCode(), SuccessStatus.CREATED.getMessage(), "New node created");
-    }
-
-    @MessageMapping("/moveNode")
-    @SendTo("/topic/nodes")
-    public NodePositionDTO updateNode(@Payload NodePositionDTO nodePositionDTO) {
-
-        nodeService.updateNodePosition(nodePositionDTO);
-
-        return nodePositionDTO;
-    }
-
-    // /api/nodes?projectId=1 형식으로 요청
-    @GetMapping("/api/nodes")
-    public ApiResponse<List<NodeRequestDTO>> getNodesByProjectId(@RequestParam("projectId") Long projectId) {
-        List<NodeRequestDTO> nodes = nodeService.getNodesByProjectId(projectId);
-        return ApiResponse.onSuccess(SuccessStatus.OK.getCode(), SuccessStatus.OK.getMessage(), nodes);
     }
 
 }

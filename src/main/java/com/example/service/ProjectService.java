@@ -10,9 +10,9 @@ import java.util.List;
 
 public interface ProjectService {
 
-
     public void saveProject(ProjectRequestDTO projectRequestDto);
 
     public Project findProjectById(Long projectId);
 
+    public void updateProject(Project project);
 }

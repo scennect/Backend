@@ -1,8 +1,11 @@
 spring:
   datasource:
-    url: jdbc:mysql://scenect-db.ctwqsim6sg2z.ap-northeast-2.rds.amazonaws.com:3306/scenect?serverTimezone=Asia/Seoul
-    username: admin
-    password: Zerocola00!
+    #url: jdbc:mysql://scenect-db.ctwqsim6sg2z.ap-northeast-2.rds.amazonaws.com:3306/scenect?serverTimezone=Asia/Seoul
+    #username: admin
+    #password: Zerocola00!
+    url: jdbc:mysql://localhost:3306/scenect
+    username: root
+    password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     properties:
@@ -14,32 +17,11 @@ spring:
         hbm2ddl:
           auto: update
 
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-name: google
-            client-id: 121710019112-pvaikt7si7sasfho84pquvo14hmrch1d.apps.googleusercontent.com
-            client-secret: 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
-            redirect-uri: http://localhost:8080/login/oauth2/code/google
-            authorization-grant-type: authorization_code
-            scope:
-            - email
-            - profile
-
   jwt:
-    secret: aasiodugahsdbjaksdgbasgbasjdbasfasb
+    secret: tpzbatpasdkbfqkdlakjsdkfasldfkjsfkasgnanwifk
+    expiration: 86400000 # 1 day
+    header: Authorization
+    prefix: Bearer
+    issuer: SecurityJWT
+    audience: SecurityJWT
 
-#S3
-cloud:
-  aws:
-    s3:
-      bucket: ${BUCKET}
-    credentials:
-      access-key: ${ACCESS_KEY}
-      secret-key: ${SECRET_KEY}
-    region:
-      static: ap-northeast-2
-    stack:
-      auto : false

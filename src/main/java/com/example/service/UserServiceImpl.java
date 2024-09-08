@@ -4,8 +4,10 @@ import com.example.apiPayload.code.status.ErrorStatus;
 import com.example.apiPayload.exception.GeneralException;
 import com.example.domain.Node;
 import com.example.domain.User;
+import com.example.dto.JoinDTO;
 import com.example.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService{
 
     private final UserRepository userRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Override
     public User findUserByUsername(String username) {
@@ -26,5 +29,29 @@ public class UserServiceImpl implements UserService{
     public User checkIfUserExistsByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+    }
+
+    @Override
+    public User findUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND_BY_EMAIL));
+    }
+
+    @Override
+    public void join(JoinDTO joinDTO){
+        Boolean exists = userRepository.existsByUsername(joinDTO.getUsername());
+        if(exists) {
+            throw new IllegalArgumentException("이미 존재하는 사용자입니다.");
+        }
+
+        User member = User.builder()
+                .username(joinDTO.getUsername())
+                .password(bCryptPasswordEncoder.encode(joinDTO.getPassword()))
+                .role("ROLE_USER")
+
+                .name(joinDTO.getName())
+                .email(joinDTO.getEmail())
+                .build();
+        userRepository.save(member);
     }
 }

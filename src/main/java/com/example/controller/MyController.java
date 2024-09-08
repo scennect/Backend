@@ -1,9 +1,8 @@
 package com.example.controller;
 
-import com.example.dto.CustomOAuth2User;
+import com.example.dto.CustomUserDetails;
 import com.example.jwt.JWTUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +17,7 @@ public class MyController {
 
     @GetMapping("/mypage")
     @ResponseBody
-    public String mypage(@CookieValue String Authorization) {
-        return jwtUtil.getUsername(Authorization);
+    public String mypage(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        return customUserDetails.getUsername();
     }
 }

@@ -2,18 +2,19 @@ package com.example.config;
 
 import com.example.jwt.JWTFilter;
 import com.example.jwt.JWTUtil;
-import com.example.oauth2.CustomFailureHandler;
-import com.example.oauth2.CustomSuccessHandler;
-import com.example.service.CustomOAuth2UserService;
+import com.example.jwt.LoginFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -24,30 +25,44 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final CustomOAuth2UserService customOAuth2UserService;
-    private final CustomSuccessHandler customSuccessHandler;
-    private final CustomFailureHandler customFailureHandler;
+    private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
+
+    //AuthenticationManager Bean 등록
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+
+        return configuration.getAuthenticationManager();
+    }
+
+    @Bean
+    public BCryptPasswordEncoder bCryptPasswordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
 
         http
-                .cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
+                .cors(corsCustomizer -> corsCustomizer
+                        .configurationSource(new CorsConfigurationSource() {
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                         CorsConfiguration corsConfiguration = new CorsConfiguration();
 
+                        //프론트 단에서 요청을 보낼 주소
                         corsConfiguration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
-                        corsConfiguration.setAllowedOrigins(Collections.singletonList("http://localhost:8080"));
+
+                        // GET, POST, PUT, DELETE, PATCH 등 모든 메소드 허용
                         corsConfiguration.setAllowedMethods(Collections.singletonList("*"));
-                        corsConfiguration.setAllowedHeaders(Collections.singletonList("*"));
                         corsConfiguration.setAllowCredentials(true);
+
+                        //모든 헤더 허용
+                        corsConfiguration.setExposedHeaders(Collections.singletonList("*"));
                         corsConfiguration.setMaxAge(3600L);
 
-                        corsConfiguration.setExposedHeaders(Collections.singletonList("Set-Cookie"));
+                        //백엔드에서 보낼때 헤더에 Authorization 추가
                         corsConfiguration.setExposedHeaders(Collections.singletonList("Authorization"));
-
                         return corsConfiguration;
                     }
                 }));
@@ -64,25 +79,24 @@ public class SecurityConfig {
         http
                 .httpBasic((auth) -> auth.disable());
 
-        //JWTFilter 추가
-        http
-                .addFilterAfter(new JWTFilter(jwtUtil), OAuth2LoginAuthenticationFilter.class);
-
-        //oauth2
-        http
-                .oauth2Login((oauth2) -> oauth2
-                        .userInfoEndpoint((userInfoEndPoingConfig) -> userInfoEndPoingConfig
-                                .userService(customOAuth2UserService))
-                        .successHandler(customSuccessHandler));
-
         //경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/", "/login","/new-node", "/project/**").permitAll()
-                        .requestMatchers("/mypage", "/new-project", "/all-project").hasRole("USER")
-                        .requestMatchers("/api/nodes/**","topic", "app/**" , "/ws/**").permitAll()
-                        .requestMatchers("/index.html").permitAll()
+                        .requestMatchers("/", "/login","/new-node", "/project/**", "/join").permitAll()
+                        .requestMatchers("/mypage", "/new-project", "/all-project", "/update-project/**").hasRole("USER")
+                        .requestMatchers( "/index.html", "app.js", "/wss/**", "favicon.ico", "/api/nodes/**").permitAll()
+                        .requestMatchers( "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+
                         .anyRequest().authenticated());
+
+        //JWTFilter 추가
+        http
+                .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
+
+        http
+                //UsernamePasswordAuthenticationFilter 자리에 LoginFilter를 추가
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
+
 
         //세션 설정 : STATELESS
         http

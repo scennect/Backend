@@ -18,6 +18,7 @@ public enum ErrorStatus implements BaseCode {
 
     // User Error
     USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "USER4001", "사용자가 없습니다."),
+    USER_NOT_FOUND_BY_EMAIL(HttpStatus.BAD_REQUEST, "USER4002", "이메일 사용자가 없습니다."),
 
     // Node Error
     NODE_NOT_FOUND(HttpStatus.BAD_REQUEST, "NODE4001", "노드가 없습니다."),
@@ -33,6 +34,7 @@ public enum ErrorStatus implements BaseCode {
     //image Error
     IMAGE_GENERATE_FAILURE(HttpStatus.BAD_REQUEST, "IMAGE4001", "이미지 생성에 실패했습니다."),
     IMAGE_UPLOAD_FAILURE(HttpStatus.BAD_REQUEST, "IMAGE4002", "이미지 업로드에 실패했습니다."),
+    PARENT_IMAGE_URL_NOT_CORRECT(HttpStatus.BAD_REQUEST, "IMAGE4003", "부모 이미지 URL이 올바르지 않습니다."),
 
     // Toekn Error
     TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "TOKEN4001", "토큰이 없습니다."),

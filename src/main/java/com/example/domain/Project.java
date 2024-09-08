@@ -46,4 +46,12 @@ public class Project extends BaseEntity{
     public void updateProjectUsers(ProjectUser projectUser){
         projectUsers.add(projectUser);
     }
+
+    public void updateProjectName(String name){
+        this.name = name;
+    }
+
+    public void updateProjectIsPublic(Boolean isPublic){
+        this.isPublic = isPublic;
+    }
 }

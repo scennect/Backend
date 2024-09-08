@@ -10,9 +10,6 @@ import com.example.dto.response.NodeResponseDTO;
 import com.example.repository.NodeRepository;
 import com.example.repository.ProjectRepository;
 import com.example.repository.UserRepository;
-import com.example.websocket.NodePosition;
-import com.example.websocket.NodePositionDTO;
-import com.example.websocket.NodePositionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +19,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.example.apiPayload.code.status.ErrorStatus.NODE_NOT_CORRECT;
+import static com.example.apiPayload.code.status.ErrorStatus.PROJECT_USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +29,7 @@ public class NodeServiceImpl implements NodeService{
     private final NodeRepository nodeRepository;
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
-    private final NodePositionRepository nodePositionRepository;
+    private final ProjectUserServiceImpl projectUserServiceImpl;
 
     @Override
     public Long saveNode(NodeRequestDTO nodeRequestDto) {
@@ -47,23 +45,34 @@ public class NodeServiceImpl implements NodeService{
                 .imageURL(nodeRequestDto.getImageURL())
                 .build();
 
-        // check if user is correct
+        // check if user exists correct
         if(nodeRequestDto.getUsername() != null){
             User checkUser = userRepository.findByUsername(nodeRequestDto.getUsername()).orElseThrow(
                     () -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
             newNode.updateUser(checkUser);
+
+            // check project and update
+            if(nodeRequestDto.getProjectId() != null){
+                Long projectId = nodeRequestDto.getProjectId();
+
+                Project checkProject = projectRepository.findById(projectId)
+                        .orElseThrow(() -> new GeneralException(ErrorStatus.PROJECT_NOT_FOUND));
+
+                // check ProjectUserExists
+                boolean checkProjectUserExists = projectUserServiceImpl.checkProjectUserExists(checkProject, checkUser);
+                if(checkProjectUserExists){
+                    newNode.updateProject(checkProject);
+                    checkProject.updateNode(newNode);
+                    projectRepository.save(checkProject);
+                }
+            }
         }
-
-        // check project and update
-        if(nodeRequestDto.getProjectId() != null){
-            Long projectId = nodeRequestDto.getProjectId();
-
-            Project checkProject = projectRepository.findById(projectId)
-                    .orElseThrow(() -> new GeneralException(ErrorStatus.PROJECT_NOT_FOUND));
-
-            newNode.updateProject(checkProject);
-            checkProject.updateNode(newNode);
-            projectRepository.save(checkProject);
+        // not login user
+        else{
+            // 로그인하지 않았는데 프로젝트에 저장하려고 한 경우
+            if (nodeRequestDto.getProjectId() != null) {
+                new GeneralException(ErrorStatus.PROJECT_USER_NOT_FOUND);
+            }
         }
 
         // 부모노드 update
@@ -113,18 +122,6 @@ public class NodeServiceImpl implements NodeService{
         return parentNodes;
     }
 
-    @Override
-    public void updateNodePosition(NodePositionDTO nodePositionDTO) {
-
-        Node foundNode = nodeRepository.findById(nodePositionDTO.getNodeId()).orElseThrow(()
-                -> new GeneralException(ErrorStatus.NODE_NOT_FOUND));
-
-        NodePosition nodePosition = foundNode.getNodePosition();
-        nodePosition.updateX(nodePositionDTO.getX());
-        nodePosition.updateY(nodePositionDTO.getY());
-
-        nodePositionRepository.save(nodePosition);
-    }
 
     @Override
     public List<NodeRequestDTO> getNodesByProjectId(Long projectId) {
@@ -141,5 +138,15 @@ public class NodeServiceImpl implements NodeService{
         return collect;
     }
 
+    @Override
+    public void checkParentNode(NodeRequestDTO nodeRequestDto) {
+        Long parentNodeId = nodeRequestDto.getParentNodeId();
+        Node parentNode = nodeRepository.findById(parentNodeId).orElseThrow(()
+                -> new GeneralException(ErrorStatus.NODE_NOT_FOUND));
+
+        if (nodeRequestDto.getParentImageURL() != parentNode.getImageURL()){
+            throw new GeneralException(ErrorStatus.PARENT_IMAGE_URL_NOT_CORRECT);
+        }
+    }
 
 }

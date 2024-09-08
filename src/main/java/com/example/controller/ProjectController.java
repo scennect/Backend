@@ -3,12 +3,13 @@ package com.example.controller;
 import com.example.apiPayload.ApiResponse;
 import com.example.apiPayload.code.status.ErrorStatus;
 import com.example.apiPayload.code.status.SuccessStatus;
-import com.example.converter.ProjectConverter;
 import com.example.domain.Node;
 import com.example.domain.Project;
 import com.example.domain.User;
+import com.example.dto.CustomUserDetails;
 import com.example.dto.ProjectDTO;
 import com.example.dto.request.ProjectRequestDTO;
+import com.example.dto.request.UpdateProjectRequestDTO;
 import com.example.dto.response.AllProjectResponseDTO;
 import com.example.dto.response.NodeResponseDTO;
 import com.example.dto.response.ProjectResponseDTO;
@@ -19,6 +20,7 @@ import com.example.service.ProjectUserService;
 import com.example.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,9 +37,9 @@ public class ProjectController {
     private final NodeService nodeService;
 
     @PostMapping("/new-project")
-    public ApiResponse<String> newProject(@CookieValue String Authorization,
+    public ApiResponse<String> newProject(@AuthenticationPrincipal CustomUserDetails customUserDetails,
                                           @RequestBody ProjectRequestDTO projectRequestDTO) {
-        String username = jwtUtil.getUsername(Authorization);
+        String username = customUserDetails.getUsername();
         projectRequestDTO.setUsername(username);
 
         projectService.saveProject(projectRequestDTO);
@@ -48,13 +50,17 @@ public class ProjectController {
 
     @GetMapping("/all-project")
     @ResponseBody
-    public ApiResponse<AllProjectResponseDTO> projects(@CookieValue(value = "Authorization", required = false) String Authorization) {
+    public ApiResponse<AllProjectResponseDTO> projects(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
         try {
-            String username = jwtUtil.getUsername(Authorization);
+            String username = customUserDetails.getUsername();
             List<ProjectDTO> allProjects = projectUserService.findAllProjects(username);
 
-            AllProjectResponseDTO allProjectResponseDto = ProjectConverter.toAllProjectResponseDto(allProjects);
+            AllProjectResponseDTO allProjectResponseDto = AllProjectResponseDTO.builder()
+                    .projects(allProjects)
+                    .build();
+
             return ApiResponse.onSuccess(SuccessStatus.OK.getCode(), SuccessStatus.OK.getMessage(), allProjectResponseDto);
         }
         catch (IllegalArgumentException e) {
@@ -65,16 +71,17 @@ public class ProjectController {
     }
 
 
+    //프로젝트 보기
     @GetMapping("/project/{projectId}")
-    public ApiResponse<ProjectResponseDTO> node(@CookieValue(value = "Authorization", required = false) String Authorization,
+    public ApiResponse<ProjectResponseDTO> viewProject(@AuthenticationPrincipal CustomUserDetails customUserDetails,
                                                 @PathVariable("projectId") Long projectId) {
 
         Project project = projectService.findProjectById(projectId);
-        String username = jwtUtil.getUsername(Authorization);
+        String username = customUserDetails.getUsername();
 
         // private project 이므로 해당 유저가 project 에 속해있는지 확인
         if (!project.getIsPublic()) {
-             //user 정보 가져오기
+            //user 정보 가져오기
             try{
                 User user = userService.findUserByUsername(username);
 
@@ -90,7 +97,12 @@ public class ProjectController {
             }
         }
 
-        ProjectResponseDTO projectResponseDTO = ProjectConverter.toProjectResponseDto(project);
+        ProjectResponseDTO projectResponseDTO = ProjectResponseDTO.builder()
+                .id(project.getId())
+                .name(project.getName())
+                .isPublic(project.getIsPublic())
+                .projectImageURL(project.getProjectImageURL())
+                .build();
 
         List<Node> nodes = project.getNodes();
 
@@ -106,5 +118,35 @@ public class ProjectController {
         return ApiResponse.onSuccess(SuccessStatus.OK.getCode(), SuccessStatus.OK.getMessage(), projectResponseDTO);
     }
 
+    // 프로젝트 편집
+    @PatchMapping("/update-project/{projectId}")
+    public ApiResponse<String> editProject(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                           @PathVariable("projectId") Long projectId,
+                                           @RequestBody UpdateProjectRequestDTO updateProjectRequestDTO) {
+        String username = customUserDetails.getUsername();
+
+        User findUser = userService.findUserByUsername(username);
+        Project findProject = projectService.findProjectById(projectId);
+
+        boolean checkProjectUser = projectUserService.checkProjectUserExists(findProject, findUser);
+        // projectUser 없으면 Error return
+        if(!checkProjectUser){
+            return ApiResponse.onFailure(ErrorStatus.PROJECT_USER_NOT_FOUND.getCode(),
+                    ErrorStatus.PROJECT_USER_NOT_FOUND.getMessage(), null);
+        }
+
+        if (updateProjectRequestDTO.getIsPublic() != null) {
+            findProject.updateProjectIsPublic(updateProjectRequestDTO.getIsPublic());
+        }
+        if (updateProjectRequestDTO.getName() != null) {
+            findProject.updateProjectName(updateProjectRequestDTO.getName());
+        }
+        if (updateProjectRequestDTO.getProjectImageURL() != null) {
+            findProject.updateProjectImageURL(updateProjectRequestDTO.getProjectImageURL());
+        }
+        projectUserService.updateProjectUser(findProject, updateProjectRequestDTO);
+
+        return ApiResponse.onSuccess(SuccessStatus.OK.getCode(), SuccessStatus.OK.getMessage(),"Project updated");
+    }
 
 }
