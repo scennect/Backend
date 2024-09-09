@@ -16,7 +16,6 @@ public class UserController {
 
     @PostMapping("/join")
     public ApiResponse<String> join(@RequestBody JoinDTO joinDTO) {
-        System.out.println("/join 실행");
         userService.join(joinDTO);
         return ApiResponse.onSuccess(SuccessStatus.OK.getCode(), SuccessStatus.OK.getMessage(), "Join Success");
     }
