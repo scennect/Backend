@@ -1,7 +1,7 @@
 package com.example.jwt;
 
-import com.example.dto.CustomUserDetails;
 import com.example.dto.UserLoginDTO;
+import com.example.service.TokenService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -10,6 +10,7 @@ import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,6 +30,7 @@ import static org.springframework.util.StreamUtils.copyToString;
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
+    private final TokenService tokenService;
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -76,21 +78,30 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         return authenticationManager.authenticate(authToken);
     }
 
+    // 사용자 인증이 성공했을 때 실행
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException, ServletException {
-        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
 
-        String username = customUserDetails.getUsername();
+        // user 정보 (아이디) 가져오기
+        String username = authentication.getName();
 
+        // GrantedAuthority 는 사용자의 권한
+        // 사용자가 여러개의 권한 (roles, authorities)를 가질 수 있으므로 Collection 반환
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        // 사용자의 권한들을 하나씩 순차적으로 접근하기 위해 Iterator 를 사용하여 authorities 컬렉션 순회 준비
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
+        // Iterator 를 이용하여 첫 번째 권한을 사용
         GrantedAuthority auth = iterator.next();
+        String role = auth.getAuthority();
 
-        String role = auth.getAuthority().toString();
+        // 토큰 생성
+        String accessToken = jwtUtil.createJWT("access", username, role, 600000L); // 10분
+        String refreshToken = jwtUtil.createJWT("refresh", username, role, 86400000L); // 24시간
 
-        String token = jwtUtil.createJWT(username, role, 1000L * 60 * 10); //10분
-
-        response.addHeader("Authorization", "Bearer " + token);
+        // 응답 설정
+        response.setHeader("access", accessToken);
+        response.addCookie(tokenService.createCookie("refresh", refreshToken));
+        response.setStatus(HttpStatus.OK.value());
     }
 
     @Override
