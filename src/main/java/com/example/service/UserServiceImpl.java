@@ -39,9 +39,9 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public void join(JoinDTO joinDTO){
-        Boolean exists = userRepository.existsByUsername(joinDTO.getUsername());
-        if(exists) {
-            throw new IllegalArgumentException("이미 존재하는 사용자입니다.");
+
+        if(userRepository.existsByUsername(joinDTO.getUsername())) {
+            throw new GeneralException(ErrorStatus.USER_ALREADY_EXISTS);
         }
 
         User member = User.builder()

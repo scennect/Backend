@@ -17,8 +17,10 @@ public enum ErrorStatus implements BaseCode {
     _FORBIDDEN(HttpStatus.FORBIDDEN, "COMMON403", "금지된 요청입니다."),
 
     // User Error
-    USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "USER4001", "사용자가 없습니다."),
-    USER_NOT_FOUND_BY_EMAIL(HttpStatus.BAD_REQUEST, "USER4002", "이메일 사용자가 없습니다."),
+    USER_NOT_LOGIN(HttpStatus.BAD_REQUEST, "USER400", "로그인 하지 않았습니다."),
+    USER_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "USER4001", "이미 존재하는 아이디입니다."),
+    USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "USER4002", "사용자가 없습니다."),
+    USER_NOT_FOUND_BY_EMAIL(HttpStatus.BAD_REQUEST, "USER4003", "이메일 사용자가 없습니다."),
 
     // Node Error
     NODE_NOT_FOUND(HttpStatus.BAD_REQUEST, "NODE4001", "노드가 없습니다."),

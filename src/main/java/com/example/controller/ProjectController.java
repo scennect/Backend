@@ -39,6 +39,9 @@ public class ProjectController {
     @PostMapping("/new-project")
     public ApiResponse<String> newProject(@AuthenticationPrincipal CustomUserDetails customUserDetails,
                                           @RequestBody ProjectRequestDTO projectRequestDTO) {
+        if (customUserDetails == null) {
+            return ApiResponse.onFailure(ErrorStatus.USER_NOT_LOGIN.getCode(), ErrorStatus.USER_NOT_LOGIN.getMessage(), "로그인을 해야됩니다.");
+        }
         String username = customUserDetails.getUsername();
         projectRequestDTO.setUsername(username);
 
