@@ -6,7 +6,7 @@ import com.example.apiPayload.code.status.SuccessStatus;
 import com.example.domain.Node;
 import com.example.domain.Project;
 import com.example.domain.User;
-import com.example.dto.CustomUserDetails;
+import com.example.dto.PrincipleDetail;
 import com.example.dto.ProjectDTO;
 import com.example.dto.request.ProjectRequestDTO;
 import com.example.dto.request.UpdateProjectRequestDTO;
@@ -36,13 +36,13 @@ public class ProjectController {
     private final UserService userService;
     private final NodeService nodeService;
 
-    @PostMapping("/new-project")
-    public ApiResponse<String> newProject(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+    @PostMapping("/project")
+    public ApiResponse<String> newProject(@AuthenticationPrincipal PrincipleDetail principleDetail,
                                           @RequestBody ProjectRequestDTO projectRequestDTO) {
-        if (customUserDetails == null) {
+        if (principleDetail == null) {
             return ApiResponse.onFailure(ErrorStatus.USER_NOT_LOGIN.getCode(), ErrorStatus.USER_NOT_LOGIN.getMessage(), "로그인을 해야됩니다.");
         }
-        String username = customUserDetails.getUsername();
+        String username = principleDetail.getUsername();
         projectRequestDTO.setUsername(username);
 
         projectService.saveProject(projectRequestDTO);
@@ -51,13 +51,13 @@ public class ProjectController {
     }
 
 
-    @GetMapping("/all-project")
+    @GetMapping("/project")
     @ResponseBody
     public ApiResponse<AllProjectResponseDTO> projects(
-            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+            @AuthenticationPrincipal PrincipleDetail principleDetail) {
 
         try {
-            String username = customUserDetails.getUsername();
+            String username = principleDetail.getUsername();
             List<ProjectDTO> allProjects = projectUserService.findAllProjects(username);
 
             AllProjectResponseDTO allProjectResponseDto = AllProjectResponseDTO.builder()
@@ -76,11 +76,11 @@ public class ProjectController {
 
     //프로젝트 보기
     @GetMapping("/project/{projectId}")
-    public ApiResponse<ProjectResponseDTO> viewProject(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+    public ApiResponse<ProjectResponseDTO> viewProject(@AuthenticationPrincipal PrincipleDetail principleDetail,
                                                 @PathVariable("projectId") Long projectId) {
 
         Project project = projectService.findProjectById(projectId);
-        String username = customUserDetails.getUsername();
+        String username = principleDetail.getUsername();
 
         // private project 이므로 해당 유저가 project 에 속해있는지 확인
         if (!project.getIsPublic()) {
@@ -110,7 +110,9 @@ public class ProjectController {
         List<Node> nodes = project.getNodes();
 
         if(!nodes.isEmpty()){
+            // 부모 노드들 가져오기
             List<Node> parentNodes = nodeService.getParentNodes(nodes);
+            // 각 부모 노드에 대해 자식 노드들 호출
             parentNodes.forEach(node -> {
                 NodeResponseDTO nodeResponseDTO = nodeService.getNodeResponseDTO(node, projectId);
                 nodeResponseDTO.setProjectId(projectId);
@@ -122,11 +124,11 @@ public class ProjectController {
     }
 
     // 프로젝트 편집
-    @PatchMapping("/update-project/{projectId}")
-    public ApiResponse<String> editProject(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+    @PatchMapping("/project/{projectId}")
+    public ApiResponse<String> editProject(@AuthenticationPrincipal PrincipleDetail principleDetail,
                                            @PathVariable("projectId") Long projectId,
                                            @RequestBody UpdateProjectRequestDTO updateProjectRequestDTO) {
-        String username = customUserDetails.getUsername();
+        String username = principleDetail.getUsername();
 
         User findUser = userService.findUserByUsername(username);
         Project findProject = projectService.findProjectById(projectId);

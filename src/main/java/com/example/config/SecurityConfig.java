@@ -3,6 +3,7 @@ package com.example.config;
 import com.example.jwt.JWTFilter;
 import com.example.jwt.JWTUtil;
 import com.example.jwt.LoginFilter;
+import com.example.redis.RedisClient;
 import com.example.service.TokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
     private final TokenService tokenService;
+    private final RedisClient redisClient;
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
@@ -94,7 +96,7 @@ public class SecurityConfig {
         //경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/", "/login", "/join", "/new-node", "/project/**").permitAll()
+                        .requestMatchers("/", "/login", "/join", "/reissue","/new-node", "/project/**").permitAll()
                         .requestMatchers("/mypage", "/new-project", "/all-project", "/update-project/**").hasRole("USER")
                         .requestMatchers( "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
@@ -102,11 +104,11 @@ public class SecurityConfig {
 
         //JWTFilter 추가
         http
-                .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
+                .addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
         http
                 //UsernamePasswordAuthenticationFilter 자리에 LoginFilter를 추가
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, tokenService), UsernamePasswordAuthenticationFilter.class);
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, tokenService, redisClient), UsernamePasswordAuthenticationFilter.class);
 
 
         //세션 설정 : STATELESS

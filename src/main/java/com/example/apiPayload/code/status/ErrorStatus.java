@@ -25,6 +25,7 @@ public enum ErrorStatus implements BaseCode {
     // Node Error
     NODE_NOT_FOUND(HttpStatus.BAD_REQUEST, "NODE4001", "노드가 없습니다."),
     NODE_NOT_CORRECT(HttpStatus.BAD_REQUEST, "NODE4002", "노드가 올바르지 않습니다."),
+    NODE_INVALID_USER(HttpStatus.BAD_REQUEST, "NODE4003", "노드 삭제 권한이 없습니다."),
 
     // Project Error
     PROJECT_NOT_FOUND(HttpStatus.BAD_REQUEST, "PROJECT4001", "프로젝트가 없습니다."),
@@ -38,10 +39,18 @@ public enum ErrorStatus implements BaseCode {
     IMAGE_UPLOAD_FAILURE(HttpStatus.BAD_REQUEST, "IMAGE4002", "이미지 업로드에 실패했습니다."),
     PARENT_IMAGE_URL_NOT_CORRECT(HttpStatus.BAD_REQUEST, "IMAGE4003", "부모 이미지 URL이 올바르지 않습니다."),
 
-    // Toekn Error
-    TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "TOKEN4001", "토큰이 없습니다."),
-    TOKEN_NOT_VALID(HttpStatus.BAD_REQUEST, "TOKEN4002", "토큰이 유효하지 않습니다."),
-    TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "TOKEN4003", "토큰이 만료되었습니다.");
+    // Token Error
+    ACCESS_TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "TOKEN4001", "Access 토큰이 없습니다."),
+    INVALID_ACCESS_TOKEN(HttpStatus.BAD_REQUEST, "TOKEN4002", "Access 토큰이 유효하지 않습니다."),
+
+    REFRESH_TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "TOKEN4003", "Refresh 토큰이 없습니다."),
+    INVALID_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, "TOKEN4004", "Refresh 토큰이 유효하지 않습니다."),
+
+    TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "TOKEN4005", "토큰이 만료되었습니다."),
+
+    // Redis Error
+    REDIS_NOT_FOUND(HttpStatus.BAD_REQUEST, "REDIS4001", "Redis 설정에 오류가 발생했습니다.");
+
 
 
     // Follow Error

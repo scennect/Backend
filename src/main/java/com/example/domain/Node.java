@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 @Getter
@@ -35,15 +36,17 @@ public class Node extends BaseEntity{
     @JoinColumn(name = "parent_id")
     private Node parentNode;
 
-    @OneToMany(mappedBy = "parentNode")
+    // 부모가 삭제될 때 자식 엔티티는 삭제되지 않음 (CascadeType.REMOVE 사용 안 함)
+    @OneToMany(mappedBy = "parentNode", cascade = CascadeType.PERSIST, orphanRemoval = false)
     @Builder.Default
-    private List<Node> children = new ArrayList<>();
+    private LinkedList<Node> children = new LinkedList<>();
 
     public void updateUser(User user){
         this.user = user;
     }
+
     public void addChild(Node node){
-        children.add(node);
+        children.addLast(node);
     }
 
     public void updateParentNode(Node parentNode){

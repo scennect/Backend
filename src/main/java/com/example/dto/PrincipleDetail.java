@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 @RequiredArgsConstructor
-public class CustomUserDetails implements UserDetails {
+public class PrincipleDetail implements UserDetails {
 
-    private final User user;
+    private final UserDTO userDTO;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -19,7 +19,7 @@ public class CustomUserDetails implements UserDetails {
         collection.add(new GrantedAuthority() {
             @Override
             public String getAuthority() {
-                return user.getRole();
+                return userDTO.getRole();
             }
         });
         return collection;
@@ -27,12 +27,12 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return user.getPassword();
+        return userDTO.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return user.getUsername();
+        return userDTO.getUsername();
     }
 
     @Override

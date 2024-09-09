@@ -2,17 +2,21 @@ package com.example.jwt;
 
 
 import com.example.domain.User;
-import com.example.dto.CustomUserDetails;
+import com.example.dto.PrincipleDetail;
+import com.example.dto.UserDTO;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 @RequiredArgsConstructor
 public class JWTFilter extends OncePerRequestFilter {
@@ -22,44 +26,65 @@ public class JWTFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        //request에서 헤더에 있는 토큰을 받아옴
-        String authorization = request.getHeader("Authorization");
+        // 헤더에서 access key에 담긴 토큰을 추출
+        String accessToken = request.getHeader("access");
 
-        // 토큰이 없거나 Bearer로 시작하지 않으면 필터체인을 통과시킴
-        if(authorization == null || !authorization.startsWith("Bearer ")) {
-            System.out.println("token = " + authorization);
+        // 토큰이 없다면 다음 필터로 넘김
+        if (accessToken == null) {
+            System.out.println("access token is null");
             filterChain.doFilter(request, response);
-
-            //조건이 해당되면 메소드 종료
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
-        //Bearer로 시작하는 토큰이 있으면 뒷부분만 떼어냄
-        String token = authorization.split(" ")[1];
+        // 토큰 만료 여부 확인
+        try{
+            jwtUtil.isExpired(accessToken);
+        } catch (ExpiredJwtException e) {
 
-        //토큰 소멸시간 검증 -> 만료됐으면 다음 필터 진행
-        if(jwtUtil.isExpired(token)) {
-            System.out.println("토큰 만료");
-            filterChain.doFilter(request, response);
+            // 만료 시 다음 필터로 넘기지 않는다.
+            // response body
+            PrintWriter writer = response.getWriter();
+            writer.println("access token expired");
 
+            // response status cod
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
-        String username = jwtUtil.getUserNameFromToken(token);
-        String role = jwtUtil.getRoleFromToken(token);
+        // 만료되지 않은 토큰의 category가 access 인지 확인 (발급 시 페이로드에 명시)
+        String category = jwtUtil.getCategoryFromToken(accessToken);
 
-        User user = User.builder()
+        if (!category.equals("access")) {
+
+            // response body
+            PrintWriter writer = response.getWriter();
+            writer.println("invalid access token");
+
+            // response status code
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
+        // 토큰에서 username, role 값을 추출
+        String username = jwtUtil.getUserNameFromToken(accessToken);
+        String role = jwtUtil.getRoleFromToken(accessToken);
+
+        UserDTO userDTO = UserDTO.builder()
                 .username(username)
                 .role(role)
-                .password("tempPassword")
                 .build();
 
-        CustomUserDetails customUserDetails = new CustomUserDetails(user);
+        // UserDeatil 에 회원 정보 객체 담기
+        PrincipleDetail principleDetail = new PrincipleDetail(userDTO);
 
-        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
+        // 스프링 시큐리티 인증 토큰 생성
+        Authentication authenticationToken = new UsernamePasswordAuthenticationToken(principleDetail, null, principleDetail.getAuthorities());
 
-        SecurityContextHolder.getContext().setAuthentication(authToken);
+        // 세션에 사용자 등록
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
         filterChain.doFilter(request, response);
     }
+
 }
