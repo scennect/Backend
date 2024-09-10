@@ -112,18 +112,14 @@ public class NodeServiceImpl implements NodeService{
             }
             // 부모노드가 있는 경우
             else {
-                LinkedList<Node> children = parentNode.getChildren();
+                List<Node> children = parentNode.getChildren();
                 // 부모노드의 자식 중 findNode를 삭제
-                for (Node child : children) {
-                    if (child.equals(findNode)) {
-                        children.remove(child);
-                    }
-                }
+                children.removeIf(child -> child.equals(findNode));
 
             }
 
             // 자식 노드들에 대해 부모 노드 삭제
-            LinkedList<Node> children = findNode.getChildren();
+            List<Node> children = findNode.getChildren();
             for (Node child : children) {
                 child.updateParentNode(null);
             }
@@ -133,11 +129,7 @@ public class NodeServiceImpl implements NodeService{
             if (project != null) {
                 // 프로젝트의 노드 중 삭제하려는 노드를 삭제
                 List<Node> nodes = project.getNodes();
-                for (Node node : nodes) {
-                    if (node.equals(findNode)) {
-                        nodes.remove(node);
-                    }
-                }
+                nodes.removeIf(node -> node.equals(findNode));
             }
 
             // 노드 삭제
@@ -200,7 +192,7 @@ public class NodeServiceImpl implements NodeService{
         Node parentNode = nodeRepository.findById(parentNodeId).orElseThrow(()
                 -> new GeneralException(ErrorStatus.NODE_NOT_FOUND));
 
-        if (nodeRequestDto.getParentImageURL() != parentNode.getImageURL()){
+        if (!nodeRequestDto.getParentImageURL().equals(parentNode.getImageURL())){
             throw new GeneralException(ErrorStatus.PARENT_IMAGE_URL_NOT_CORRECT);
         }
     }

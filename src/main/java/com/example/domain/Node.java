@@ -39,7 +39,7 @@ public class Node extends BaseEntity{
     // 부모가 삭제될 때 자식 엔티티는 삭제되지 않음 (CascadeType.REMOVE 사용 안 함)
     @OneToMany(mappedBy = "parentNode", cascade = CascadeType.PERSIST, orphanRemoval = false)
     @Builder.Default
-    private LinkedList<Node> children = new LinkedList<>();
+    private List<Node> children = new ArrayList<>();
 
     public void updateUser(User user){
         this.user = user;

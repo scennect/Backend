@@ -45,6 +45,7 @@ public class NodeController {
         }
 
         String imageURL = imageService.generateImage(nodeRequestDto.getText(), nodeRequestDto.getParentImageURL());
+        //String imageURL = "default_Image_Url"; // 로컬에서 위에 generateImage 없이 돌릴때 사용할 용도
         nodeRequestDto.setImageURL(imageURL);
 
         nodeService.saveNode(nodeRequestDto);
@@ -60,7 +61,7 @@ public class NodeController {
 
         nodeService.DeleteNodeByIdAndUser(nodeId, user);
 
-        return ApiResponse.onSuccess(SuccessStatus.CREATED.getCode(), SuccessStatus.CREATED.getMessage(), "Node successfully deleted");
+        return ApiResponse.onSuccess(SuccessStatus.OK.getCode(), SuccessStatus.OK.getMessage(), "Node successfully deleted");
     }
 
 }

@@ -10,7 +10,6 @@ import com.example.dto.PrincipleDetail;
 import com.example.dto.ProjectDTO;
 import com.example.dto.request.ProjectRequestDTO;
 import com.example.dto.request.UpdateProjectRequestDTO;
-import com.example.dto.response.AllProjectResponseDTO;
 import com.example.dto.response.NodeResponseDTO;
 import com.example.dto.response.ProjectResponseDTO;
 import com.example.jwt.JWTUtil;
@@ -53,18 +52,14 @@ public class ProjectController {
 
     @GetMapping("/project")
     @ResponseBody
-    public ApiResponse<AllProjectResponseDTO> projects(
+    public ApiResponse<List<ProjectDTO>> projects(
             @AuthenticationPrincipal PrincipleDetail principleDetail) {
 
         try {
             String username = principleDetail.getUsername();
-            List<ProjectDTO> allProjects = projectUserService.findAllProjects(username);
+            List<ProjectDTO> allProjectsList = projectUserService.findAllProjects(username);
 
-            AllProjectResponseDTO allProjectResponseDto = AllProjectResponseDTO.builder()
-                    .projects(allProjects)
-                    .build();
-
-            return ApiResponse.onSuccess(SuccessStatus.OK.getCode(), SuccessStatus.OK.getMessage(), allProjectResponseDto);
+            return ApiResponse.onSuccess(SuccessStatus.OK.getCode(), SuccessStatus.OK.getMessage(), allProjectsList);
         }
         catch (IllegalArgumentException e) {
             log.info("not logged in user");
