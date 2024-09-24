@@ -20,7 +20,8 @@ import org.springframework.context.annotation.Configuration;
 @RequiredArgsConstructor
 public class SwaggerConfig {
     private final String SCHEME_NAME = "JWT Authentication";
-    private final String COOKIE_NAME = "accessToken";
+    private final String ACCESS_HEADER_NAME = "access";
+    private final String REFRESH_HEADER_NAME = "access";
 
     @Bean
     public OpenAPI openAPI() {
@@ -32,8 +33,8 @@ public class SwaggerConfig {
 
     private SecurityScheme createSecurityScheme() {
         return new SecurityScheme()
-                .name(COOKIE_NAME)
-                .in(SecurityScheme.In.COOKIE)
+                .name(ACCESS_HEADER_NAME)
+                .in(SecurityScheme.In.HEADER)
                 .type(SecurityScheme.Type.APIKEY);
     }
 }

@@ -1,6 +1,8 @@
 package com.example.jwt;
 
+import com.example.dto.LoginResponseDTO;
 import com.example.dto.UserLoginDTO;
+import com.example.redis.RedisClient;
 import com.example.service.TokenService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,7 +24,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import static org.springframework.util.StreamUtils.copyToString;
 
@@ -31,6 +35,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
     private final TokenService tokenService;
+    private final RedisClient redisClient;
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -102,11 +107,41 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.setHeader("access", accessToken);
         response.addCookie(tokenService.createCookie("refresh", refreshToken));
         response.setStatus(HttpStatus.OK.value());
+
+        // redis 에 refresh 토큰 저장
+        redisClient.setValue(username, refreshToken, 864000000L);
+
+
+        LoginResponseDTO loginResponse = LoginResponseDTO.builder()
+                .username(username)
+                .role(role)
+                .build();
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.writeValue(response.getWriter(), loginResponse);
     }
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
 
-        response.setStatus(401);
+        response.setStatus(HttpStatus.UNAUTHORIZED.value()); // 실패 시 상태 코드 설정
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("code", "MEMBER4001");
+        errorResponse.put("message", "로그인 과정에서 오류가 발생했습니다.");
+
+        try {
+            String jsonResponse = objectMapper.writeValueAsString(errorResponse);
+            response.getWriter().write(jsonResponse);
+        } catch (IOException e) {
+            throw new AuthenticationServiceException("Failed to write authentication response body", e);
+        }
     }
+
 }

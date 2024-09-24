@@ -1,6 +1,7 @@
 package com.example.service;
 
 import com.example.domain.Node;
+import com.example.domain.User;
 import com.example.dto.request.NodeRequestDTO;
 import com.example.dto.response.NodeResponseDTO;
 
@@ -9,6 +10,8 @@ import java.util.List;
 public interface NodeService {
 
     public Long saveNode(NodeRequestDTO nodeRequestDto);
+
+    public void DeleteNodeByIdAndUser(Long nodeId, User user);
 
     public NodeResponseDTO getNodeResponseDTO(Node firstNode, Long projectId);
 

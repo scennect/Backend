@@ -68,10 +68,9 @@ public class ProjectServiceImpl implements ProjectService{
             project.updateProjectImageURL(projectImageURL);
 
             // 노드들의 프로젝트 정보 업데이트
-            nodesList.stream().forEach(node -> node.updateProject(project));
-            nodesList.stream().forEach(node -> nodeRepository.save(node));
-
-            nodesList.stream().forEach(node -> project.updateNode(node));
+            nodesList.forEach(node -> node.updateProject(project));
+            nodeRepository.saveAll(nodesList);
+            nodesList.forEach(project::updateNode);
         }
 
         projectRepository.save(project);

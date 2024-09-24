@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -61,7 +62,10 @@ public class NodeServiceImpl implements NodeService{
                 // check ProjectUserExists
                 boolean checkProjectUserExists = projectUserServiceImpl.checkProjectUserExists(checkProject, checkUser);
                 if(checkProjectUserExists){
+                    // 노드에 프로젝트 업데이트
                     newNode.updateProject(checkProject);
+
+                    // 프로젝트에 노드 업데이트
                     checkProject.updateNode(newNode);
                     projectRepository.save(checkProject);
                 }
@@ -91,6 +95,50 @@ public class NodeServiceImpl implements NodeService{
     }
 
     @Override
+    public void DeleteNodeByIdAndUser(Long nodeId, User user) {
+        // nodeId 로 node 찾기
+        Node findNode = nodeRepository.findById(nodeId).orElseThrow(()
+                -> new GeneralException(ErrorStatus.NODE_NOT_FOUND));
+
+        // node 생성자 인지 확인
+        if (!findNode.getUser().equals(user)) {
+            new GeneralException(ErrorStatus.NODE_INVALID_USER);
+        }
+        else {
+            Node parentNode = findNode.getParentNode();
+            // 부모노드가 없는 경우
+            if (parentNode == null) {
+
+            }
+            // 부모노드가 있는 경우
+            else {
+                List<Node> children = parentNode.getChildren();
+                // 부모노드의 자식 중 findNode를 삭제
+                children.removeIf(child -> child.equals(findNode));
+
+            }
+
+            // 자식 노드들에 대해 부모 노드 삭제
+            List<Node> children = findNode.getChildren();
+            for (Node child : children) {
+                child.updateParentNode(null);
+            }
+
+            // 만약 노드가 프로젝트에 속해 있는 경우
+            Project project = findNode.getProject();
+            if (project != null) {
+                // 프로젝트의 노드 중 삭제하려는 노드를 삭제
+                List<Node> nodes = project.getNodes();
+                nodes.removeIf(node -> node.equals(findNode));
+            }
+
+            // 노드 삭제
+            nodeRepository.delete(findNode);
+        }
+
+    }
+
+    @Override
     public NodeResponseDTO getNodeResponseDTO(Node node, Long projectId) {
         NodeResponseDTO nodeResponseDTO = NodeResponseDTO.builder()
                 .id(node.getId())
@@ -99,7 +147,7 @@ public class NodeServiceImpl implements NodeService{
                 .build();
 
         if(!node.getChildren().isEmpty()){
-            node.getChildren().stream().forEach(childNode -> {
+            node.getChildren().forEach(childNode -> {
                 NodeResponseDTO childNodeResponseDTO = getNodeResponseDTO(childNode, projectId);
                 childNodeResponseDTO.setParentNodeId(node.getId());
                 childNodeResponseDTO.setProjectId(projectId);
@@ -144,7 +192,7 @@ public class NodeServiceImpl implements NodeService{
         Node parentNode = nodeRepository.findById(parentNodeId).orElseThrow(()
                 -> new GeneralException(ErrorStatus.NODE_NOT_FOUND));
 
-        if (nodeRequestDto.getParentImageURL() != parentNode.getImageURL()){
+        if (!nodeRequestDto.getParentImageURL().equals(parentNode.getImageURL())){
             throw new GeneralException(ErrorStatus.PARENT_IMAGE_URL_NOT_CORRECT);
         }
     }
