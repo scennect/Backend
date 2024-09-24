@@ -3,6 +3,7 @@ package com.example.config;
 import com.example.jwt.JWTFilter;
 import com.example.jwt.JWTUtil;
 import com.example.jwt.LoginFilter;
+import com.example.service.TokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -28,6 +29,7 @@ public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
+    private final TokenService tokenService;
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
@@ -104,7 +106,7 @@ public class SecurityConfig {
 
         http
                 //UsernamePasswordAuthenticationFilter 자리에 LoginFilter를 추가
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, tokenService), UsernamePasswordAuthenticationFilter.class);
 
 
         //세션 설정 : STATELESS
