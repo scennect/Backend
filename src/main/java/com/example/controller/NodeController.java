@@ -2,7 +2,6 @@ package com.example.controller;
 
 import com.example.apiPayload.ApiResponse;
 import com.example.apiPayload.code.status.SuccessStatus;
-import com.example.domain.Node;
 import com.example.domain.User;
 import com.example.dto.PrincipleDetail;
 import com.example.dto.request.NodeRequestDTO;
