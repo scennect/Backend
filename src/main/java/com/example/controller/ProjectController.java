@@ -19,6 +19,7 @@ import com.example.service.ProjectUserService;
 import com.example.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,12 +29,13 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class ProjectController {
-    private final JWTUtil jwtUtil;
 
     private final ProjectService projectService;
     private final ProjectUserService projectUserService;
     private final UserService userService;
     private final NodeService nodeService;
+
+    private final SimpMessagingTemplate messagingTemplate;
 
     @PostMapping("/project")
     public ApiResponse<String> newProject(@AuthenticationPrincipal PrincipleDetail principleDetail,
@@ -45,6 +47,10 @@ public class ProjectController {
         projectRequestDTO.setUsername(username);
 
         projectService.saveProject(projectRequestDTO);
+
+        // 실시간으로 새 프로젝트 생성 알림 전송
+        messagingTemplate.convertAndSend("/topic/projectUpdates", "New project created by " + username);
+
 
         return ApiResponse.onSuccess(SuccessStatus.CREATED.getCode(), SuccessStatus.CREATED.getMessage(),"New Project created");
     }

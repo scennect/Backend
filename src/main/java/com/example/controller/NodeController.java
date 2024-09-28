@@ -12,6 +12,7 @@ import com.example.service.UserService;
 import com.example.service.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -26,8 +27,7 @@ public class NodeController {
     private final NodeService nodeService;
     private final UserService userService;
     private final ImageService imageService;
-    private final JWTUtil jwtUtil;
-    private final UserServiceImpl userServiceImpl;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @PostMapping("/node")
     public ApiResponse<String> newNode(@RequestBody NodeRequestDTO nodeRequestDto,
@@ -48,6 +48,9 @@ public class NodeController {
         nodeRequestDto.setImageURL(imageURL);
 
         nodeService.saveNode(nodeRequestDto);
+
+        // 생성된 노드를 실시간으로 브로드캐스트 (WebSocket 사용)
+        messagingTemplate.convertAndSend("/topic/nodes/" + nodeRequestDto.getProjectId(), nodeRequestDto);
 
         return ApiResponse.onSuccess(SuccessStatus.CREATED.getCode(), SuccessStatus.CREATED.getMessage(), "New node created");
     }
