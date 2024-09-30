@@ -53,7 +53,7 @@ public class ImageServiceImpl implements ImageService{
 
         String url = "http://localhost:8000/modify-image";  // FastAPI 서버의 URL
 
-        String requestBody = "{\"prompt\": \"" + prompt + "\"imageURL\": \"" + imageURL + "\"}";
+        String requestBody = "{\"prompt\": \"" + prompt + "\", \"imageURL\": " + imageURL + "}";
 
         HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
 
