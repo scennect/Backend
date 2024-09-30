@@ -20,7 +20,7 @@ public class Node extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String text;
+    private String prompt;
 
     private String imageURL;
 
@@ -41,9 +41,6 @@ public class Node extends BaseEntity{
     @Builder.Default
     private List<Node> children = new ArrayList<>();
 
-    public void updateUser(User user){
-        this.user = user;
-    }
 
     public void addChild(Node node){
         children.addLast(node);
@@ -53,11 +50,5 @@ public class Node extends BaseEntity{
         this.parentNode = parentNode;
     }
 
-    public void updateProject(Project project){
-        this.project = project;
-    }
 
-    public void updateImageURL(String imageURL){
-        this.imageURL = imageURL;
-    }
 }

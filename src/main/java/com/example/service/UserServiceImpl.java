@@ -5,6 +5,7 @@ import com.example.apiPayload.exception.GeneralException;
 import com.example.domain.Node;
 import com.example.domain.User;
 import com.example.dto.JoinDTO;
+import com.example.dto.PrincipleDetail;
 import com.example.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -35,6 +36,15 @@ public class UserServiceImpl implements UserService{
     public User findUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND_BY_EMAIL));
+    }
+
+    @Override
+    public User loadMemberByPrincipleDetail(PrincipleDetail principalDetail) {
+        // 현재 로그인한 사용자 정보 가져오기
+        String username = principalDetail.getUsername();
+
+        return userRepository.findByUsername(username).orElseThrow(()
+                -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
     }
 
     @Override

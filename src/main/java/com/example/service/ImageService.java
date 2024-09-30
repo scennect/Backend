@@ -8,6 +8,8 @@ import java.io.IOException;
 
 public interface ImageService {
 
-    public String generateImage(String text, String imageURL);
+    public String generateTextToImage(String prompt);
+
+    public String generateImageToImage(String prompt, String imageURL);
 
 }

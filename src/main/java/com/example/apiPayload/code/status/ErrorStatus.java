@@ -26,6 +26,7 @@ public enum ErrorStatus implements BaseCode {
     NODE_NOT_FOUND(HttpStatus.BAD_REQUEST, "NODE4001", "노드가 없습니다."),
     NODE_NOT_CORRECT(HttpStatus.BAD_REQUEST, "NODE4002", "노드가 올바르지 않습니다."),
     NODE_INVALID_USER(HttpStatus.BAD_REQUEST, "NODE4003", "노드 삭제 권한이 없습니다."),
+    NODE_INVALID_PROMPT(HttpStatus.BAD_REQUEST, "NODE4004", "노드 Prompt 가 Null 입니다."),
 
     // Project Error
     PROJECT_NOT_FOUND(HttpStatus.BAD_REQUEST, "PROJECT4001", "프로젝트가 없습니다."),

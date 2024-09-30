@@ -2,12 +2,14 @@ package com.example.service;
 
 import com.example.apiPayload.code.status.ErrorStatus;
 import com.example.apiPayload.exception.GeneralException;
+import com.example.converter.ProjectConverter;
 import com.example.domain.Node;
 import com.example.domain.Project;
 import com.example.domain.User;
 import com.example.dto.request.ProjectRequestDTO;
 import com.example.dto.request.UpdateProjectRequestDTO;
-import com.example.repository.NodeRepository;
+import com.example.dto.response.NodeResponseDTO;
+import com.example.dto.response.ProjectResponseDTO;
 import com.example.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -24,67 +26,108 @@ import java.util.stream.Collectors;
 public class ProjectServiceImpl implements ProjectService{
 
     private final ProjectRepository projectRepository;
-    private final NodeRepository nodeRepository;
-    private final UserService userService;
+
+    private final NodeService nodeService;
     private final ProjectUserService projectUserService;
 
+    // 프로젝트 처음 생성할때 실행
     @Override
-    public void saveProject(ProjectRequestDTO projectRequestDTO) {
-        //check if user exists
-        User user = userService.findUserByUsername(projectRequestDTO.getUsername());
+    public void saveProject(ProjectRequestDTO projectRequestDTO, User user) {
 
-        // 프로젝트명, 공개여부로 project build
-        Project project = Project.builder()
-                .name(projectRequestDTO.getName())
-                .isPublic(projectRequestDTO.getIsPublic())
-                .build();
+        // 프로젝트 저장 : 프로젝트명, 공개여부로 project build
+        Project project = ProjectConverter.toProjectEntity(projectRequestDTO);
 
         // 프로젝트 생성 유저 저장
         projectUserService.saveProjectUser(project, user);
 
-        // 팀원 초대 있을 시, 팀원들에 대한 ProjectUser 저장
-        List<String> memberEmails = projectRequestDTO.getMemberEmails();
-        if(memberEmails != null && !memberEmails.isEmpty()) {
-            memberEmails.stream().forEach(memberEmail -> {
-                try {
-                    User member = userService.findUserByEmail(memberEmail);
-                    projectUserService.saveProjectUser(project, member);
-                } catch (GeneralException e) {
-                    log.info("User not found with email: " + memberEmail);
-                }
+        // 팀원 초대 처리
+        Optional.ofNullable(projectRequestDTO.getMemberEmails())
+                .ifPresent(emailList -> emailList.forEach(email ->
+                        projectUserService.saveProjectUserByEmail(project, email)));
+
+        projectRepository.save(project);
+    }
+
+
+    @Override
+    public ProjectResponseDTO viewProjectByIdAndUser(Long projectId, User user) {
+        Project project = findProjectById(projectId);
+
+        // private project 이므로 해당 유저가 project 에 속해있는지 확인
+        if (!project.getIsPublic()) {
+            // projectUser 없으면 Error return
+            if (!projectUserService.checkProjectUserExists(project, user)) {
+                throw new GeneralException(ErrorStatus.PROJECT_USER_NOT_FOUND);
+            }
+        }
+
+        ProjectResponseDTO projectResponseDTO = ProjectConverter.toProjectResponseDTO(project);
+
+        List<Node> nodes = project.getNodes();
+
+        if(!nodes.isEmpty()){
+            // 부모 노드들 가져오기
+            List<Node> parentNodes = nodeService.getParentNodes(nodes);
+            // 각 부모 노드에 대해 자식 노드들 포함한  호출
+            parentNodes.forEach(node -> {
+                NodeResponseDTO nodeResponseDTO = nodeService.getNodeResponseDTO(node);
+                projectResponseDTO.addNodeResponseDTO(nodeResponseDTO);
             });
         }
 
-        // 저장할 노드가 있는 프로젝트
-        List<Long> nodeIds = projectRequestDTO.getNodeIds();
-        if (!nodeIds.isEmpty()) {
-            List<Node> nodesList = nodeIds.stream()
-                    .map(nodeId -> nodeRepository.findById(nodeId)
-                            .orElseThrow(() -> new GeneralException(ErrorStatus.NODE_NOT_FOUND)))
-                    .collect(Collectors.toList());
+        return projectResponseDTO;
+    }
 
-            // 프로젝트 image url 설정 (첫번째 노드의 image url)
-            String projectImageURL = nodesList.get(0).getImageURL();
-            project.updateProjectImageURL(projectImageURL);
+    @Override
+    public Project findProjectById(Long projectId) {
 
-            // 노드들의 프로젝트 정보 업데이트
-            nodesList.forEach(node -> node.updateProject(project));
-            nodeRepository.saveAll(nodesList);
-            nodesList.forEach(project::updateNode);
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.PROJECT_NOT_FOUND));
+    }
+
+    // 프로젝트 이름, 공개여부, 팀원 변경시 사용
+    @Override
+    public void updateProject(Long projectId, User user, UpdateProjectRequestDTO updateProjectRequestDTO) {
+
+        Project project = findProjectById(projectId);
+
+        // 프로젝트 권한이 없으므로 Error return
+        if (!projectUserService.checkProjectUserExists(project, user)) {
+            throw new GeneralException(ErrorStatus.PROJECT_USER_NOT_FOUND);
         }
+
+        if (updateProjectRequestDTO.getIsPublic() != null) {
+            project.updateProjectIsPublic(updateProjectRequestDTO.getIsPublic());
+        }
+        if (updateProjectRequestDTO.getName() != null) {
+            project.updateProjectName(updateProjectRequestDTO.getName());
+        }
+        if (updateProjectRequestDTO.getProjectImageURL() != null) {
+            project.updateProjectImageURL(updateProjectRequestDTO.getProjectImageURL());
+        }
+
+        // 팀원 초대 처리
+        Optional.ofNullable(updateProjectRequestDTO.getMemberEmails())
+                .ifPresent(emailList -> emailList.forEach(email ->
+                        projectUserService.saveProjectUserByEmail(project, email)));
 
         projectRepository.save(project);
     }
 
     @Override
-    public Project findProjectById(Long projectId) {
+    public Project verifyProjectAccess(Long projectId, User user) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.PROJECT_NOT_FOUND));
+
+        if (!projectUserService.checkProjectUserExists(project, user)) {
+            throw new GeneralException(ErrorStatus.PROJECT_USER_NOT_FOUND);
+        }
         return project;
     }
 
     @Override
-    public void updateProject(Project project) {
+    public void addNode(Project project, Node node) {
+        project.updateNode(node);
         projectRepository.save(project);
     }
 

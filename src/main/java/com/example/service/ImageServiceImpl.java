@@ -24,47 +24,48 @@ public class ImageServiceImpl implements ImageService{
     private final RestTemplate restTemplate;
 
     @Override
-    public String generateImage(String text, String imageURL) {
+    public String generateTextToImage(String prompt) {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        // imageURL 없는 경우 : 첫번째 노드 생성시
-        if (imageURL.isEmpty()) {
-            String url = "http://localhost:8000/generate-text2image";  // FastAPI 서버의 URL
+        String url = "http://localhost:8000/generate-image";  // FastAPI 서버의 URL
 
-            String requestBody = "{\"text\": \"" + text + "\"}";
+        String requestBody = "{\"text\": \"" + prompt + "\"}";
 
-            HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
+        HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
 
-            try {
-                // FastAPI 서버에 POST 요청을 보내 이미지 생성
-                ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class);
-                return response.getBody();
-            } catch (Exception e) {
-                log.error("Failed to generate image: {}", e.getMessage());
-                throw new GeneralException(ErrorStatus.IMAGE_GENERATE_FAILURE);
-            }
-
-
-        }
-        // imageURL 있는 경우
-        else {
-            String url = "http://localhost:8000/generate-image2image";  // FastAPI 서버의 URL
-
-            String requestBody = "{\"text\": \"" + text + "\"imageURL\": \"" + imageURL + "\"}";
-
-            HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
-
-            try {
-                // FastAPI 서버에 POST 요청을 보내 이미지 생성
-                ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class);
-                return response.getBody();
-            } catch (Exception e) {
-                log.error("Failed to generate image: {}", e.getMessage());
-                throw new GeneralException(ErrorStatus.IMAGE_GENERATE_FAILURE);
-            }
-
+        try {
+            // FastAPI 서버에 POST 요청을 보내 이미지 생성
+            ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class);
+            return response.getBody();
+        } catch (Exception e) {
+            log.error("Failed to generate image: {}", e.getMessage());
+            throw new GeneralException(ErrorStatus.IMAGE_GENERATE_FAILURE);
         }
     }
+
+    @Override
+    public String generateImageToImage(String prompt, String imageURL) {
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        String url = "http://localhost:8000/modify-image";  // FastAPI 서버의 URL
+
+        String requestBody = "{\"prompt\": \"" + prompt + "\"imageURL\": \"" + imageURL + "\"}";
+
+        HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
+
+        try {
+            // FastAPI 서버에 POST 요청을 보내 이미지 생성
+            ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class);
+            return response.getBody();
+        } catch (Exception e) {
+            log.error("Failed to generate image: {}", e.getMessage());
+            throw new GeneralException(ErrorStatus.IMAGE_GENERATE_FAILURE);
+        }
+    }
+
+
 }
