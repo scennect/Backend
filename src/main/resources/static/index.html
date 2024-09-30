@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Node Creation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+<h1>Node Creation</h1>
+
+<!-- Project ID 입력 폼 -->
+<form id="projectForm">
+    <label for="projectId">Project ID:</label>
+    <input type="number" id="projectId" required><br>
+    <button type="submit">Load Project</button>
+</form>
+
+<div id="projectDetails"></div>
+
+<!-- 노드 생성 폼 -->
+<form id="nodeForm" style="display:none;"> <!-- 노드를 표시할 때만 보이도록 설정 -->
+    <label for="prompt">Prompt:</label>
+    <input type="text" id="prompt" required><br>
+
+    <label for="parentNodeId">Parent Node ID:</label>
+    <input type="number" id="parentNodeId"><br>
+
+    <button type="submit">Create Node</button>
+</form>
+
+<div id="nodesContainer" style="display:none;">
+    <h2>Nodes:</h2>
+    <ul id="nodesList"></ul>
+</div>
+
+<script>
+    const projectForm = document.getElementById('projectForm');
+    const nodeForm = document.getElementById('nodeForm');
+    const projectDetails = document.getElementById('projectDetails');
+    const nodesContainer = document.getElementById('nodesContainer');
+    const nodesList = document.getElementById('nodesList');
+    let stompClient = null;
+
+    // Project ID 입력 폼 처리
+    projectForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const projectId = document.getElementById('projectId').value;
+
+        // /project/{projectId}로 GET 요청
+        fetch(`/project/${projectId}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "access": `${localStorage.getItem('access')}` // Access Token 추가
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Project loaded:", data);
+                projectDetails.innerHTML = `<p>Project ID: ${data.data.id}, Project Name: ${data.data.name}</p>`;
+
+                // 노드 목록 초기화
+                nodesList.innerHTML = ""; // Clear previous nodes
+
+                // 노드 목록을 화면에 표시
+                data.data.nodes.forEach(node => {
+                    addNodeToList(node);
+                });
+
+                // 프로젝트가 성공적으로 로드되면 노드 관련 기능 표시
+                nodeForm.style.display = 'block';
+                nodesContainer.style.display = 'block';
+
+                // WebSocket 연결 시작
+                connectWebSocket(projectId);
+            })
+            .catch(error => {
+                console.error("Error loading project:", error);
+            });
+    });
+
+    // WebSocket 연결 함수
+    function connectWebSocket(projectId) {
+        const socket = new SockJS('/ws'); // 서버의 WebSocket 엔드포인트
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({
+            "access": `${localStorage.getItem('access')}` // Access Token 추가  // WebSocket 연결 시 토큰 포함
+        }, function (frame) {
+            console.log('Connected: ' + frame);
+
+            // WebSocket을 통해 노드를 실시간으로 받는 구독 설정
+            stompClient.subscribe(`/topic/nodes/${projectId}`, function (message) {
+                const newNode = JSON.parse(message.body);
+                addNodeToList(newNode);
+            });
+        });
+    }
+
+    // 노드 생성 폼 처리
+    nodeForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const prompt = document.getElementById('prompt').value;
+        const parentNodeId = document.getElementById('parentNodeId').value;
+        const projectId = document.getElementById('projectId').value;
+
+        const nodeData = {
+            prompt: prompt,
+            parentNodeId: parentNodeId ? parseInt(parentNodeId) : null, // parentNodeId가 없으면 null로 설정
+            projectId: parseInt(projectId)
+        };
+
+        // 노드 생성 API 호출 (토큰을 Authorization 헤더에 추가)
+        fetch("/node", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "access": `${localStorage.getItem('access')}` // Access Token 추가
+            },
+            body: JSON.stringify(nodeData)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Node created:", data);
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+    });
+
+    function addNodeToList(node) {
+        const listItem = document.createElement('li');
+        listItem.textContent = `Prompt: ${node.prompt}, Parent Node ID: ${node.parentNodeId || 'null'}, Node ID: ${node.id}`;
+
+        // If there's an imageURL, add an image element
+        if (node.imageURL) {
+            const imageElement = document.createElement('img');
+            // Clean up the image URL (assuming it might have escape characters)
+            const cleanImageURL = node.imageURL.replace(/\\\":\\\"/, '').replace(/\\/, '');
+            imageElement.src = cleanImageURL; // Set the cleaned URL
+            imageElement.alt = node.prompt;
+            imageElement.style.width = '100px'; // Set a size for the image
+            imageElement.style.height = 'auto'; // Maintain aspect ratio
+            listItem.appendChild(imageElement); // Append image to the list item
+        }
+
+        nodesList.appendChild(listItem);
+    }
+
+</script>
+</body>
+</html>
