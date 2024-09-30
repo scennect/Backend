@@ -11,7 +11,9 @@ public interface ProjectUserService {
 
     public void saveProjectUser(Project project, User user);
 
-    public List<ProjectDTO> findAllProjects(String username);
+    public void saveProjectUserByEmail(Project project, String email);
+
+    public List<ProjectDTO> findAllProjects(User user);
 
     public boolean checkProjectUserExists(Project project, User user);
 

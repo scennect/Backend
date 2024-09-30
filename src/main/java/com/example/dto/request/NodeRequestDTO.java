@@ -9,10 +9,9 @@ import lombok.*;
 @NoArgsConstructor
 public class NodeRequestDTO {
 
-    private String username;
-    private String text;
-    private String imageURL;
+    private String prompt;
+
     private Long parentNodeId;
+
     private Long projectId;
-    private String parentImageURL;
 }

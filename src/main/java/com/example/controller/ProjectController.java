@@ -33,124 +33,96 @@ public class ProjectController {
     private final ProjectService projectService;
     private final ProjectUserService projectUserService;
     private final UserService userService;
-    private final NodeService nodeService;
 
     private final SimpMessagingTemplate messagingTemplate;
 
+    //프로젝트 생성
     @PostMapping("/project")
     public ApiResponse<String> newProject(@AuthenticationPrincipal PrincipleDetail principleDetail,
                                           @RequestBody ProjectRequestDTO projectRequestDTO) {
         if (principleDetail == null) {
-            return ApiResponse.onFailure(ErrorStatus.USER_NOT_LOGIN.getCode(), ErrorStatus.USER_NOT_LOGIN.getMessage(), "로그인을 해야됩니다.");
+            log.info("Unauthenticated request - User not logged in");
+            return ApiResponse.onFailure(
+                    ErrorStatus.USER_NOT_LOGIN.getCode(),
+                    ErrorStatus.USER_NOT_LOGIN.getMessage(),
+                    "로그인을 해야 됩니다."
+            );
         }
-        String username = principleDetail.getUsername();
-        projectRequestDTO.setUsername(username);
 
-        projectService.saveProject(projectRequestDTO);
+        User user = userService.loadMemberByPrincipleDetail(principleDetail);
+
+        projectService.saveProject(projectRequestDTO, user);
 
         // 실시간으로 새 프로젝트 생성 알림 전송
-        messagingTemplate.convertAndSend("/topic/projectUpdates", "New project created by " + username);
-
+        messagingTemplate.convertAndSend("/topic/projectUpdates", "New project created by " + user.getName());
 
         return ApiResponse.onSuccess(SuccessStatus.CREATED.getCode(), SuccessStatus.CREATED.getMessage(),"New Project created");
     }
 
-
+    // 전체 프로젝트 보기
     @GetMapping("/project")
-    @ResponseBody
-    public ApiResponse<List<ProjectDTO>> projects(
-            @AuthenticationPrincipal PrincipleDetail principleDetail) {
+    public ApiResponse<?> projects(@AuthenticationPrincipal PrincipleDetail principleDetail) {
 
-        try {
-            String username = principleDetail.getUsername();
-            List<ProjectDTO> allProjectsList = projectUserService.findAllProjects(username);
+        if (principleDetail == null) {
+            log.info("Unauthenticated request - User not logged in");
+            return ApiResponse.onFailure(
+                    ErrorStatus.USER_NOT_LOGIN.getCode(),
+                    ErrorStatus.USER_NOT_LOGIN.getMessage(),
+                    "로그인을 해야 됩니다."
+            );
+        }
 
-            return ApiResponse.onSuccess(SuccessStatus.OK.getCode(), SuccessStatus.OK.getMessage(), allProjectsList);
-        }
-        catch (IllegalArgumentException e) {
-            log.info("not logged in user");
-            return ApiResponse.onFailure(ErrorStatus._UNAUTHORIZED.getCode(),
-                    ErrorStatus._UNAUTHORIZED.getMessage(), null);
-        }
+        // 사용자 정보 로드
+        User user = userService.loadMemberByPrincipleDetail(principleDetail);
+
+        // 사용자가 참여한 모든 프로젝트 조회
+        List<ProjectDTO> allProjectsList = projectUserService.findAllProjects(user);
+
+        return ApiResponse.onSuccess(
+                SuccessStatus.OK.getCode(),
+                SuccessStatus.OK.getMessage(),
+                allProjectsList
+        );
     }
 
 
-    //프로젝트 보기
+    // 선택 프로젝트 보기
     @GetMapping("/project/{projectId}")
-    public ApiResponse<ProjectResponseDTO> viewProject(@AuthenticationPrincipal PrincipleDetail principleDetail,
+    public ApiResponse<?> viewProject(@AuthenticationPrincipal PrincipleDetail principleDetail,
                                                 @PathVariable("projectId") Long projectId) {
 
-        Project project = projectService.findProjectById(projectId);
-        String username = principleDetail.getUsername();
-
-        // private project 이므로 해당 유저가 project 에 속해있는지 확인
-        if (!project.getIsPublic()) {
-            //user 정보 가져오기
-            try{
-                User user = userService.findUserByUsername(username);
-
-                // projectUser 없으면 Error return
-                if (!projectUserService.checkProjectUserExists(project, user)) {
-                    return ApiResponse.onFailure(ErrorStatus.PROJECT_USER_NOT_FOUND.getCode(),
-                            ErrorStatus.PROJECT_USER_NOT_FOUND.getMessage(), null);
-                }
-            } catch (IllegalArgumentException e) {
-                log.info("not logged in user");
-                return ApiResponse.onFailure(ErrorStatus.PROJECT_NOT_PUBLIC.getCode(),
-                        ErrorStatus.PROJECT_NOT_PUBLIC.getMessage(), null);
-            }
+        if (principleDetail == null) {
+            log.info("Unauthenticated request - User not logged in");
+            return ApiResponse.onFailure(
+                    ErrorStatus.USER_NOT_LOGIN.getCode(),
+                    ErrorStatus.USER_NOT_LOGIN.getMessage(),
+                    "로그인을 해야 됩니다."
+            );
         }
 
-        ProjectResponseDTO projectResponseDTO = ProjectResponseDTO.builder()
-                .id(project.getId())
-                .name(project.getName())
-                .isPublic(project.getIsPublic())
-                .projectImageURL(project.getProjectImageURL())
-                .build();
-
-        List<Node> nodes = project.getNodes();
-
-        if(!nodes.isEmpty()){
-            // 부모 노드들 가져오기
-            List<Node> parentNodes = nodeService.getParentNodes(nodes);
-            // 각 부모 노드에 대해 자식 노드들 호출
-            parentNodes.forEach(node -> {
-                NodeResponseDTO nodeResponseDTO = nodeService.getNodeResponseDTO(node, projectId);
-                nodeResponseDTO.setProjectId(projectId);
-                projectResponseDTO.addNodeResponseDTO(nodeResponseDTO);
-            });
-        }
+        User user = userService.loadMemberByPrincipleDetail(principleDetail);
+        ProjectResponseDTO projectResponseDTO = projectService.viewProjectByIdAndUser(projectId, user);
 
         return ApiResponse.onSuccess(SuccessStatus.OK.getCode(), SuccessStatus.OK.getMessage(), projectResponseDTO);
     }
 
-    // 프로젝트 편집
+    // 프로젝트 정보 편집
     @PatchMapping("/project/{projectId}")
     public ApiResponse<String> editProject(@AuthenticationPrincipal PrincipleDetail principleDetail,
                                            @PathVariable("projectId") Long projectId,
                                            @RequestBody UpdateProjectRequestDTO updateProjectRequestDTO) {
-        String username = principleDetail.getUsername();
 
-        User findUser = userService.findUserByUsername(username);
-        Project findProject = projectService.findProjectById(projectId);
-
-        boolean checkProjectUser = projectUserService.checkProjectUserExists(findProject, findUser);
-        // projectUser 없으면 Error return
-        if(!checkProjectUser){
-            return ApiResponse.onFailure(ErrorStatus.PROJECT_USER_NOT_FOUND.getCode(),
-                    ErrorStatus.PROJECT_USER_NOT_FOUND.getMessage(), null);
+        if (principleDetail == null) {
+            log.info("Unauthenticated request - User not logged in");
+            return ApiResponse.onFailure(
+                    ErrorStatus.USER_NOT_LOGIN.getCode(),
+                    ErrorStatus.USER_NOT_LOGIN.getMessage(),
+                    "로그인을 해야 됩니다."
+            );
         }
 
-        if (updateProjectRequestDTO.getIsPublic() != null) {
-            findProject.updateProjectIsPublic(updateProjectRequestDTO.getIsPublic());
-        }
-        if (updateProjectRequestDTO.getName() != null) {
-            findProject.updateProjectName(updateProjectRequestDTO.getName());
-        }
-        if (updateProjectRequestDTO.getProjectImageURL() != null) {
-            findProject.updateProjectImageURL(updateProjectRequestDTO.getProjectImageURL());
-        }
-        projectUserService.updateProjectUser(findProject, updateProjectRequestDTO);
+        User user = userService.loadMemberByPrincipleDetail(principleDetail);
+        projectService.updateProject(projectId, user, updateProjectRequestDTO);
 
         return ApiResponse.onSuccess(SuccessStatus.OK.getCode(), SuccessStatus.OK.getMessage(),"Project updated");
     }

@@ -1,5 +1,6 @@
 package com.example.service;
 
+import com.example.apiPayload.exception.GeneralException;
 import com.example.domain.Project;
 import com.example.domain.ProjectUser;
 import com.example.domain.User;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 public class ProjectUserServiceImpl implements ProjectUserService{
 
     private final ProjectUserRepository projectUserRepository;
+
     private final UserService userService;
 
     @Override
@@ -39,9 +41,23 @@ public class ProjectUserServiceImpl implements ProjectUserService{
 
 
     @Override
+    public void saveProjectUserByEmail(Project project, String email) {
+        try {
+            User member = userService.findUserByEmail(email);
+            if (!checkProjectUserExists(project, member)) { // 중복 체크
+                saveProjectUser(project, member);
+            } else {
+                log.info("User already in project: " + email);
+            }
+        } catch (GeneralException e) {
+            log.info("User not found with email: " + email);
+        }
+    }
+
+
+    @Override
     // 내가 속한 프로젝트들 조회
-    public List<ProjectDTO> findAllProjects(String username) {
-        User user = userService.findUserByUsername(username);
+    public List<ProjectDTO> findAllProjects(User user) {
 
         List<ProjectUser> myProjects = user.getMyProjects();
 

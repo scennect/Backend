@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class MyController {
 
-
     @GetMapping("/mypage")
     @ResponseBody
     public String mypage(@AuthenticationPrincipal PrincipleDetail principleDetail) {

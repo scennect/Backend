@@ -8,12 +8,10 @@ import java.util.List;
 
 @Builder
 @Getter
-@Setter
 public class ProjectRequestDTO {
 
-    private String username;
     private String name;
     private Boolean isPublic;
     private List<String> memberEmails;
-    private List<Long> nodeIds;
+
 }
