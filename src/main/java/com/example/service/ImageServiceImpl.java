@@ -31,7 +31,7 @@ public class ImageServiceImpl implements ImageService{
 
         String url = "http://localhost:8000/generate-image";  // FastAPI 서버의 URL
 
-        String requestBody = "{\"text\": \"" + prompt + "\"}";
+        String requestBody = "{\"prompt\": \"" + prompt + "\"}";
 
         HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
 
