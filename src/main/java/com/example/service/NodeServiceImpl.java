@@ -44,9 +44,10 @@ public class NodeServiceImpl implements NodeService{
 
         }
         else {
-//            imageURL = imageService.generateTextToImage(nodeRequestDto.getPrompt());
-            imageURL = "s3_url\\\":\\\"https://hongik-s3.s3.amazonaws.com/42_10_7.5.png\\"; // 로컬에서 위에 generateImage 없이 돌릴때 사용할 용도
+            imageURL = imageService.generateTextToImage(nodeRequestDto.getPrompt());
 
+            // 로컬에서 위에 generateImage 없이 돌릴때 사용할 용도
+            //imageURL = "s3_url :\"https://hongik-s3.s3.amazonaws.com/42_10_7.5.png\"";
 
         }
 

@@ -38,6 +38,8 @@ public class SecurityConfig {
         return web -> {
             web.ignoring()
                     .requestMatchers("/join",
+                            "/index.html", "/login.html", "/favicon.ico",
+                            "/topic/**", "/app/**", "/ws/**",
                             "/api-docs/**", "/swagger-ui/**", "/swagger-ui.html/**", "/v3/api-docs/**", "/swagger-ui/index.html#/**");// 필터를 타면 안되는 경로
         };
     }
@@ -96,8 +98,10 @@ public class SecurityConfig {
         //경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/", "/login", "/join", "/reissue","/new-node", "/project/**").permitAll()
-                        .requestMatchers("/mypage", "/new-project", "/all-project", "/update-project/**").hasRole("USER")
+                        .requestMatchers("/", "/login", "/join", "/reissue",
+                                "/index.html", "/login.html", "/favicon.ico",
+                                "/topic/**", "/app/**", "/ws/**").permitAll()
+                        .requestMatchers("/node/**", "/mypage", "/project/**").hasRole("USER")
                         .requestMatchers( "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
                         .anyRequest().authenticated());

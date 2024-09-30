@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+</head>
+<body>
+<h1>Login</h1>
+
+<form id="login-form">
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" required><br><br>
+
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required><br><br>
+
+    <button type="submit">Login</button>
+</form>
+
+<div id="login-response"></div>
+
+<script>
+    document.getElementById("login-form").addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+
+        const loginData = {
+            username: username,
+            password: password,
+        };
+
+        fetch("http://localhost:8080/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(loginData),
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Login failed');
+                }
+
+                // Extract the access token from response headers
+                const accessToken = response.headers.get('access');
+                console.log("Access Token from headers:", accessToken);
+
+                // Store the access token in localStorage
+                if (accessToken) {
+                    localStorage.setItem("access", accessToken);
+                } else {
+                    throw new Error('Access token not found in response headers');
+                }
+
+                return response.json();  // Assuming the server sends a JSON response
+            })
+            .then(data => {
+                console.log("Server Response:", data); // Log the full response for debugging
+
+                // Redirect to index.html
+                window.location.href = "index.html";
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Login failed");
+            });
+    });
+</script>
+</body>
+</html>
