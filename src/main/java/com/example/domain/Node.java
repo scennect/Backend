@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 @Getter
@@ -43,7 +42,7 @@ public class Node extends BaseEntity{
 
 
     public void addChild(Node node){
-        children.addLast(node);
+        children.add(node);
     }
 
     public void updateParentNode(Node parentNode){
