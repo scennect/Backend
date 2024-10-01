@@ -29,7 +29,7 @@ public class NodeServiceImpl implements NodeService{
     public Long saveNode(NodeRequestDTO nodeRequestDto, User user, Project project) {
 
         // Prompt가 제대로 들어왔는지 확인
-        if(nodeRequestDto.getPrompt().isEmpty()){
+        if(nodeRequestDto.getPrompt() == null || nodeRequestDto.getPrompt().isEmpty()){
             throw new GeneralException(ErrorStatus.NODE_INVALID_PROMPT);
         }
 
@@ -53,6 +53,10 @@ public class NodeServiceImpl implements NodeService{
 
         // build new node
         Node newNode = NodeConverter.toNodeEntity(nodeRequestDto.getPrompt(), imageURL, user, project, parentNode);
+
+        if (parentNode != null) {
+            parentNode.addChild(newNode);
+        }
 
         // save new node
         Node saveNode = nodeRepository.save(newNode);
