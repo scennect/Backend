@@ -97,7 +97,7 @@
             console.log('Connected: ' + frame);
 
             // WebSocket을 통해 노드를 실시간으로 받는 구독 설정
-            stompClient.subscribe(`/topic/nodes/${projectId}`, function (message) {
+            stompClient.subscribe(`/topic/project/${projectId}`, function (message) {
                 const newNode = JSON.parse(message.body);
                 addNodeToList(newNode);
             });
@@ -145,21 +145,19 @@
         const listItem = document.createElement('li');
         listItem.textContent = `Prompt: ${node.prompt}, Parent Node ID: ${node.parentNodeId || 'null'}, Node ID: ${node.id}`;
 
-        // If there's an imageURL, add an image element
+        // 이미지 URL이 있으면 이미지 태그 추가
         if (node.imageURL) {
             const imageElement = document.createElement('img');
-            // Clean up the image URL (assuming it might have escape characters)
-            const cleanImageURL = node.imageURL.replace(/\\\":\\\"/, '').replace(/\\/, '');
-            imageElement.src = cleanImageURL; // Set the cleaned URL
+            const cleanImageURL = node.imageURL.replace(/['"]+/g, ''); // URL에서 따옴표 제거
+            imageElement.src = cleanImageURL; // 수정된 URL 사용
             imageElement.alt = node.prompt;
-            imageElement.style.width = '100px'; // Set a size for the image
-            imageElement.style.height = 'auto'; // Maintain aspect ratio
-            listItem.appendChild(imageElement); // Append image to the list item
+            imageElement.style.width = '100px';
+            imageElement.style.height = 'auto';
+            listItem.appendChild(imageElement);
         }
 
         nodesList.appendChild(listItem);
     }
-
 </script>
 </body>
 </html>

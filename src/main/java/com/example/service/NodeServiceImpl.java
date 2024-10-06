@@ -26,7 +26,7 @@ public class NodeServiceImpl implements NodeService{
     private final ImageService imageService;
 
     @Override
-    public Long saveNode(NodeRequestDTO nodeRequestDto, User user, Project project) {
+    public NodeResponseDTO saveNode(NodeRequestDTO nodeRequestDto, User user, Project project) {
 
         // Prompt가 제대로 들어왔는지 확인
         if(nodeRequestDto.getPrompt().isEmpty()){
@@ -42,13 +42,16 @@ public class NodeServiceImpl implements NodeService{
             parentNode = findNodeById(nodeRequestDto.getParentNodeId());
             imageURL = imageService.generateImageToImage(nodeRequestDto.getPrompt(), parentNode.getImageURL());
 
+            // 로컬에서 위에 generateImage 없이 돌릴때 사용할 용도
+            //imageURL = "https://hongik-s3.s3.amazonaws.com/42_10_7.5.png";
+
+
         }
         else {
             imageURL = imageService.generateTextToImage(nodeRequestDto.getPrompt());
 
             // 로컬에서 위에 generateImage 없이 돌릴때 사용할 용도
-            //imageURL = "s3_url :\"https://hongik-s3.s3.amazonaws.com/42_10_7.5.png\"";
-
+            imageURL = "https://hongik-s3.s3.amazonaws.com/42_10_7.5.png";
         }
 
         // build new node
@@ -56,7 +59,9 @@ public class NodeServiceImpl implements NodeService{
 
         // save new node
         Node saveNode = nodeRepository.save(newNode);
-        return saveNode.getId();
+
+        // DTO로 반환해서 return
+        return NodeConverter.toNodeResponseDTO(saveNode);
     }
 
     @Override

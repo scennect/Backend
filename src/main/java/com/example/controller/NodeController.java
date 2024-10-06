@@ -7,6 +7,7 @@ import com.example.domain.Project;
 import com.example.domain.User;
 import com.example.dto.PrincipleDetail;
 import com.example.dto.request.NodeRequestDTO;
+import com.example.dto.response.NodeResponseDTO;
 import com.example.service.NodeService;
 import com.example.service.ProjectService;
 import com.example.service.UserService;
@@ -44,10 +45,10 @@ public class NodeController {
         User user = userService.loadMemberByPrincipleDetail(principleDetail);
         Project project = projectService.verifyProjectAccess(nodeRequestDto.getProjectId(), user);
 
-        nodeService.saveNode(nodeRequestDto, user, project);
+        NodeResponseDTO nodeResponseDTO = nodeService.saveNode(nodeRequestDto, user, project);
 
         // 생성된 노드를 실시간으로 브로드캐스트 (WebSocket 사용)
-        messagingTemplate.convertAndSend("/topic/nodes/" + nodeRequestDto.getProjectId(), nodeRequestDto);
+        messagingTemplate.convertAndSend("/topic/project/" + nodeRequestDto.getProjectId(), nodeResponseDTO);
 
         return ApiResponse.onSuccess(SuccessStatus.CREATED.getCode(), SuccessStatus.CREATED.getMessage(), "New node created");
     }
