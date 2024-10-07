@@ -47,7 +47,7 @@ public class NodeController {
 
         NodeResponseDTO nodeResponseDTO = nodeService.saveNode(nodeRequestDto, user, project);
 
-        // 생성된 노드를 실시간으로 브로드캐스트 (WebSocket 사용)
+        // 생성된 노드를 /topic/project/{projectId}로 실시간 브로드캐스트 (WebSocket 사용)
         messagingTemplate.convertAndSend("/topic/project/" + nodeRequestDto.getProjectId(), nodeResponseDTO);
 
         return ApiResponse.onSuccess(SuccessStatus.CREATED.getCode(), SuccessStatus.CREATED.getMessage(), "New node created");

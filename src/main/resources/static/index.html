@@ -6,6 +6,39 @@
     <title>Node Creation</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        .cursor {
+            position: absolute;
+            width: 10px; /* 커서 크기 조정 */
+            height: 10px; /* 커서 크기 조정 */
+            background: red; /* 커서 색상 */
+            border-radius: 50%; /* 원형으로 만들기 */
+            pointer-events: none; /* 클릭 이벤트 차단 */
+            z-index: 1000; /* 다른 요소 위에 표시 */
+        }
+
+        .node-box {
+            border: 2px solid #ccc; /* 박스 테두리 */
+            border-radius: 5px; /* 박스 모서리 둥글게 */
+            padding: 10px; /* 안쪽 여백 */
+            margin: 10px; /* 박스 간격 */
+            display: inline-block; /* 인라인 블록으로 나란히 배치 */
+            width: 150px; /* 박스 너비 */
+            text-align: center; /* 텍스트 가운데 정렬 */
+            position: absolute; /* 위치 조정 가능하도록 설정 */
+            cursor: move; /* 마우스 커서를 드래그 가능으로 변경 */
+        }
+
+        .node-image {
+            max-width: 100%; /* 이미지가 박스를 넘어가지 않도록 조정 */
+            height: auto; /* 비율 유지 */
+        }
+
+        .moving {
+            border-color: yellow; /* 움직이는 동안 테두리 색상 변경 */
+            border-width: 3px; /* 테두리 두께 변경 */
+        }
+    </style>
 </head>
 <body>
 <h1>Node Creation</h1>
@@ -32,7 +65,7 @@
 
 <div id="nodesContainer" style="display:none;">
     <h2>Nodes:</h2>
-    <ul id="nodesList"></ul>
+    <div id="nodesList"></div> <!-- 리스트를 div로 감싸서 박스 형태로 변경 -->
 </div>
 
 <script>
@@ -42,6 +75,7 @@
     const nodesContainer = document.getElementById('nodesContainer');
     const nodesList = document.getElementById('nodesList');
     let stompClient = null;
+    const cursors = {}; // 다른 사용자의 커서를 저장할 객체
 
     // Project ID 입력 폼 처리
     projectForm.addEventListener('submit', function(event) {
@@ -92,7 +126,7 @@
         stompClient = Stomp.over(socket);
 
         stompClient.connect({
-            "access": `${localStorage.getItem('access')}` // Access Token 추가  // WebSocket 연결 시 토큰 포함
+            "access": `${localStorage.getItem('access')}` // Access Token 추가
         }, function (frame) {
             console.log('Connected: ' + frame);
 
@@ -101,7 +135,109 @@
                 const newNode = JSON.parse(message.body);
                 addNodeToList(newNode);
             });
+
+            // WebSocket을 통해 마우스 좌표 수신
+            stompClient.subscribe(`/topic/mouse/${projectId}`, function (message) {
+                const mouseData = JSON.parse(message.body);
+                updateMouseCursor(mouseData);
+            });
+
+            // WebSocket을 통해 노드 움직임 수신
+            stompClient.subscribe(`/topic/move/${projectId}`, function (message) {
+                const moveData = JSON.parse(message.body);
+                moveNode(moveData);
+            });
         });
+    }
+
+    // 마우스 움직임 감지 및 WebSocket으로 전송
+    document.addEventListener('mousemove', function(event) {
+        if (stompClient && stompClient.connected) {
+            const mouseData = {
+                x: event.clientX,
+                y: event.clientY
+            };
+            stompClient.send(`/app/mouse/${document.getElementById('projectId').value}`, {}, JSON.stringify(mouseData));
+        }
+    });
+
+    function makeNodeDraggable(nodeElement, nodeId) {
+        let offsetX, offsetY;
+
+        // 드래그 시작 시 처리
+        nodeElement.addEventListener('mousedown', function(event) {
+            offsetX = event.clientX - nodeElement.getBoundingClientRect().left; // 마우스 X 위치
+            offsetY = event.clientY - nodeElement.getBoundingClientRect().top; // 마우스 Y 위치
+
+            // 드래그 중에 노란색 테두리 적용
+            nodeElement.style.border = '2px solid yellow'; // 노란색 테두리로 변경
+
+            // 문서에 마우스 이동 이벤트 리스너 추가
+            document.addEventListener('mousemove', dragNode);
+
+            // 마우스 버튼이 떼어지면 드래그 종료
+            document.addEventListener('mouseup', stopDrag);
+        });
+
+        // 노드 드래그 함수
+        function dragNode(event) {
+            nodeElement.style.left = `${event.clientX - offsetX}px`; // 새로운 X 위치 설정
+            nodeElement.style.top = `${event.clientY - offsetY}px`; // 새로운 Y 위치 설정
+
+            // 노드 이동 정보를 다른 사용자에게 전송하는 로직 추가 가능
+            const nodeData = {
+                id: nodeId,
+                x: parseInt(nodeElement.style.left, 10),
+                y: parseInt(nodeElement.style.top, 10)
+            };
+
+            // WebSocket을 통해 다른 사용자에게 노드의 새로운 위치 전송
+            stompClient.send(`/topic/project/${projectId}`, {}, JSON.stringify(nodeData));
+        }
+
+        // 드래그 종료 함수
+        function stopDrag() {
+            // 드래그 종료 시 테두리 원래 색으로 되돌리기
+            nodeElement.style.border = '2px solid black'; // 원래의 테두리 색으로 복원
+
+            // 이벤트 리스너 제거
+            document.removeEventListener('mousemove', dragNode);
+            document.removeEventListener('mouseup', stopDrag);
+        }
+    }
+
+    // 노드 위치 업데이트
+    function moveNode(moveData) {
+        const nodeElement = document.getElementById(`node-${moveData.id}`);
+        if (nodeElement) {
+            nodeElement.style.left = `${moveData.x}px`;
+            nodeElement.style.top = `${moveData.y}px`;
+            nodeElement.classList.add('moving'); // 움직일 때 테두리 색상 변경
+
+            // 잠시 후 테두리 원래 색으로 복원
+            setTimeout(() => {
+                nodeElement.classList.remove('moving');
+            }, 1000); // 1초 후에 원래 색으로 복원
+        }
+    }
+
+    // 서버로부터 받은 마우스 데이터를 화면에 업데이트
+    function updateMouseCursor(mouseData) {
+        const cursorId = `cursor-${mouseData.id}`; // 고유 커서 ID 생성
+
+        // 커서 요소 생성 또는 업데이트
+        if (!cursors[cursorId]) {
+            const cursorElement = document.createElement('div');
+            cursorElement.id = cursorId;
+            cursorElement.className = 'cursor';
+            document.body.appendChild(cursorElement);
+            cursors[cursorId] = cursorElement; // 커서 객체에 추가
+        }
+
+        // 커서 위치 업데이트
+        const cursorElement = cursors[cursorId];
+        cursorElement.style.left = `${mouseData.x}px`;
+        cursorElement.style.top = `${mouseData.y}px`;
     }
 
     // 노드 생성 폼 처리
@@ -114,12 +250,12 @@
 
         const nodeData = {
             prompt: prompt,
-            parentNodeId: parentNodeId ? parseInt(parentNodeId) : null, // parentNodeId가 없으면 null로 설정
-            projectId: parseInt(projectId)
+            parentNodeId: parentNodeId,
+            projectId: projectId
         };
 
-        // 노드 생성 API 호출 (토큰을 Authorization 헤더에 추가)
-        fetch("/node", {
+        // 서버로 노드 생성 요청
+        fetch('/node', {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -135,15 +271,31 @@
             })
             .then(data => {
                 console.log("Node created:", data);
+                addNodeToList(data); // 새로 생성된 노드를 화면에 추가
             })
             .catch(error => {
-                console.error("Error:", error);
+                console.error("Error creating node:", error);
             });
     });
 
+    // 노드를 화면에 추가하는 함수
     function addNodeToList(node) {
-        const listItem = document.createElement('li');
-        listItem.textContent = `Prompt: ${node.prompt}, Parent Node ID: ${node.parentNodeId || 'null'}, Node ID: ${node.id}`;
+        const nodeElement = document.createElement('div');
+        nodeElement.id = `node-${node.id}`; // 각 노드에 고유 ID 추가
+        nodeElement.className = 'node-box'; // CSS 스타일 적용을 위한 클래스
+
+        // 노드의 스타일 설정
+        nodeElement.style.position = 'absolute'; // 절대 위치 설정
+        nodeElement.style.left = `${node.x}px`; // 초기 x 좌표 설정
+        nodeElement.style.top = `${node.y}px`; // 초기 y 좌표 설정
+        nodeElement.style.border = '2px solid black'; // 테두리 설정
+        nodeElement.style.padding = '10px'; // 패딩 추가
+        nodeElement.style.margin = '5px'; // 마진 추가
+        nodeElement.style.backgroundColor = 'white'; // 배경색 설정
+        nodeElement.style.zIndex = '10'; // z-index 설정으로 다른 요소 위에 보이게
+
+        // 노드 내용을 추가
+        nodeElement.innerHTML = `<h3>${node.prompt}</h3>`; // 노드의 프롬프트 추가
 
         // 이미지 URL이 있으면 이미지 태그 추가
         if (node.imageURL) {
@@ -151,13 +303,18 @@
             const cleanImageURL = node.imageURL.replace(/['"]+/g, ''); // URL에서 따옴표 제거
             imageElement.src = cleanImageURL; // 수정된 URL 사용
             imageElement.alt = node.prompt;
-            imageElement.style.width = '100px';
-            imageElement.style.height = 'auto';
-            listItem.appendChild(imageElement);
+            imageElement.style.width = '100px'; // 이미지 너비 설정
+            imageElement.style.height = 'auto'; // 높이는 자동으로 설정
+            nodeElement.appendChild(imageElement); // 노드 박스에 이미지 추가
         }
 
-        nodesList.appendChild(listItem);
+        // 노드 드래그 가능하도록 설정
+        makeNodeDraggable(nodeElement, node.id);
+
+        // 노드를 리스트에 추가
+        nodesList.appendChild(nodeElement);
     }
+
 </script>
 </body>
 </html>
