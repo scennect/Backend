@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface NodeService {
 
-    public Long saveNode(NodeRequestDTO nodeRequestDto, User user, Project project);
+    public NodeResponseDTO saveNode(NodeRequestDTO nodeRequestDto, User user, Project project);
 
     public void DeleteNodeByIdAndUser(Long nodeId, User user);
 
