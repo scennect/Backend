@@ -33,7 +33,7 @@ public class ProjectController {
 
     //프로젝트 생성
     @PostMapping("/project")
-    public ApiResponse<String> newProject(@AuthenticationPrincipal PrincipleDetail principleDetail,
+    public ApiResponse<?> newProject(@AuthenticationPrincipal PrincipleDetail principleDetail,
                                           @RequestBody ProjectRequestDTO projectRequestDTO) {
         if (principleDetail == null) {
             log.info("Unauthenticated request - User not logged in");
@@ -46,12 +46,9 @@ public class ProjectController {
 
         User user = userService.loadMemberByPrincipleDetail(principleDetail);
 
-        projectService.saveProject(projectRequestDTO, user);
+        Long newProjectId = projectService.saveProject(projectRequestDTO, user);
 
-        // 실시간으로 새 프로젝트 생성 알림 전송
-        messagingTemplate.convertAndSend("/topic/projectUpdates", "New project created by " + user.getName());
-
-        return ApiResponse.onSuccess(SuccessStatus.CREATED.getCode(), SuccessStatus.CREATED.getMessage(),"New Project created");
+        return ApiResponse.onSuccess(SuccessStatus.CREATED.getCode(), SuccessStatus.CREATED.getMessage(),newProjectId);
     }
 
     // 전체 프로젝트 보기

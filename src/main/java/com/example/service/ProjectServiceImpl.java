@@ -32,7 +32,7 @@ public class ProjectServiceImpl implements ProjectService{
 
     // 프로젝트 처음 생성할때 실행
     @Override
-    public void saveProject(ProjectRequestDTO projectRequestDTO, User user) {
+    public Long saveProject(ProjectRequestDTO projectRequestDTO, User user) {
 
         // 프로젝트 저장 : 프로젝트명, 공개여부로 project build
         Project project = ProjectConverter.toProjectEntity(projectRequestDTO);
@@ -45,7 +45,9 @@ public class ProjectServiceImpl implements ProjectService{
                 .ifPresent(emailList -> emailList.forEach(email ->
                         projectUserService.saveProjectUserByEmail(project, email)));
 
-        projectRepository.save(project);
+        Project savedProject = projectRepository.save(project);
+
+        return savedProject.getId();
     }
 
 

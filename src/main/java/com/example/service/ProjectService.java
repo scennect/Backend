@@ -14,7 +14,7 @@ import java.util.List;
 
 public interface ProjectService {
 
-    public void saveProject(ProjectRequestDTO projectRequestDTO, User user);
+    public Long saveProject(ProjectRequestDTO projectRequestDTO, User user);
 
     public ProjectResponseDTO viewProjectByIdAndUser(Long projectId, User user);
 
