@@ -28,7 +28,8 @@ jobs:
       - name: make application.yml
         run: |
           ## create application.yml
-          mkdir ./src/main/resources
+          # mkdir ./src/main/resources
+          # static 파일때문에 이미 resources 폴더가 존해함
           cd ./src/main/resources
           # application.yml 파일 생성
           touch ./application.yml
