@@ -18,7 +18,7 @@ public class CorsMvcConfig implements WebMvcConfigurer {
                         .allowedHeaders()
                         .exposedHeaders("Set-Cookie")
                         .allowCredentials(true) // 쿠키를 주고 받을 수 있게 설정
-                        .allowedOrigins("http://http://52.78.73.212:8080/", "http://localhost:8080");
+                        .allowedOrigins("http://52.78.73.212:8080/", "http://localhost:8080");
             }
         };
     }
