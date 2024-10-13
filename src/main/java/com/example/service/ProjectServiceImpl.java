@@ -63,7 +63,7 @@ public class ProjectServiceImpl implements ProjectService{
             }
         }
 
-        ProjectResponseDTO projectResponseDTO = ProjectConverter.toProjectResponseDTO(project);
+        ProjectResponseDTO projectResponseDTO = ProjectConverter.toProjectResponseDTO(project, user.getName());
 
         List<Node> nodes = project.getNodes();
 

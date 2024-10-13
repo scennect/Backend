@@ -13,7 +13,9 @@ import java.util.List;
 public class ProjectResponseDTO {
 
     private Long id;
-    private String name;
+    private String projectName;
+    // 사용자 이름 (username X)
+    private String projectUserName;
     private Boolean isPublic;
     private String projectImageURL;
 

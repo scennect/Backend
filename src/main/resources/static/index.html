@@ -90,7 +90,7 @@
     const nodesContainer = document.getElementById('nodesContainer');
     const nodesList = document.getElementById('nodesList');
     let stompClient = null;
-    const cursors = {}; // 다른 사용자의 커서를 저장할 객체
+    const userCursors = {}; // 사용자의 커서와 이름을 보여줄 요소를 저장할 객체
 
     // Project ID 입력 폼 처리
     projectForm.addEventListener('submit', function(event) {
@@ -113,7 +113,10 @@
             })
             .then(data => {
                 console.log("Project loaded:", data);
-                projectDetails.innerHTML = `<p>Project ID: ${data.data.id}, Project Name: ${data.data.name}</p>`;
+                projectDetails.innerHTML = `<p>Project ID: ${data.data.id}, Project Name: ${data.data.projectName}</p>`;
+
+                // 사용자 이름 저장
+                currentUserName = data.data.projectUserName; // 사용자 이름 저장
 
                 // 노드 목록 초기화
                 nodesList.innerHTML = ""; // Clear previous nodes
@@ -151,8 +154,8 @@
                 addNodeToList(newNode);
             });
 
-            // WebSocket을 통해 들어온 좌표 데이터를 처리
-            stompClient.subscribe(`/topic/move/${projectId}`, function (message) {
+            // WebSocket을 통해 들어온 노드 좌표 데이터를 처리
+            stompClient.subscribe(`/topic/node/${projectId}`, function (message) {
                 const nodeData = JSON.parse(message.body);
 
                 // 전송된 nodeId로 해당 노드 요소를 찾음
@@ -170,7 +173,25 @@
             // WebSocket을 통해 마우스 좌표 수신
             stompClient.subscribe(`/topic/mouse/${projectId}`, function (message) {
                 const mouseData = JSON.parse(message.body);
-                updateMouseCursor(mouseData);
+                const { name, x, y } = mouseData;
+
+                // 커서 요소가 이미 존재하는지 확인
+                if (!userCursors[name]) {
+                    // 커서 요소 생성
+                    const cursorElement = document.createElement('div');
+                    cursorElement.className = 'cursor';
+                    cursorElement.style.position = 'absolute';
+                    cursorElement.innerHTML = `<span>${name}</span>`;
+                    document.body.appendChild(cursorElement);
+
+                    // 사용자 커서 저장
+                    userCursors[name] = cursorElement;
+                }
+
+                // 커서 위치 업데이트
+                const cursorElement = userCursors[name];
+                cursorElement.style.left = `${x}px`;
+                cursorElement.style.top = `${y}px`;
             });
 
         });
@@ -180,6 +201,7 @@
     document.addEventListener('mousemove', function(event) {
         if (stompClient && stompClient.connected) {
             const mouseData = {
+                name: currentUserName, // 사용자 이름 추가
                 x: event.clientX,
                 y: event.clientY
             };
@@ -278,7 +300,7 @@
             };
 
             // WebSocket을 통해 다른 사용자에게 노드의 새로운 위치 전송
-            stompClient.send(`/app/move/${document.getElementById('projectId').value}`, {}, JSON.stringify(nodeData));
+            stompClient.send(`/app/node/${document.getElementById('projectId').value}`, {}, JSON.stringify(nodeData));
         }
 
         // 드래그 종료 함수
@@ -333,25 +355,6 @@
                 nodeElement.classList.remove('moving');
             }, 1000); // 1초 후에 원래 색으로 복원
         }
-    }
-
-    // 서버로부터 받은 마우스 데이터를 화면에 업데이트
-    function updateMouseCursor(mouseData) {
-        const cursorId = `cursor-${mouseData.id}`; // 고유 커서 ID 생성
-
-        // 커서 요소 생성 또는 업데이트
-        if (!cursors[cursorId]) {
-            const cursorElement = document.createElement('div');
-            cursorElement.id = cursorId;
-            cursorElement.className = 'cursor';
-            document.body.appendChild(cursorElement);
-            cursors[cursorId] = cursorElement; // 커서 객체에 추가
-        }
-
-        // 커서 위치 업데이트
-        const cursorElement = cursors[cursorId];
-        cursorElement.style.left = `${mouseData.x}px`;
-        cursorElement.style.top = `${mouseData.y}px`;
     }
 
     // 노드 생성 폼 처리
