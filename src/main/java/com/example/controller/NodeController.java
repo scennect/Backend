@@ -6,7 +6,7 @@ import com.example.apiPayload.code.status.SuccessStatus;
 import com.example.domain.Project;
 import com.example.domain.User;
 import com.example.dto.PrincipleDetail;
-import com.example.dto.request.CoordinateDTO;
+import com.example.dto.CoordinateDTO;
 import com.example.dto.request.NodeRequestDTO;
 import com.example.dto.response.NodeResponseDTO;
 import com.example.service.NodeService;
@@ -79,17 +79,16 @@ public class NodeController {
                 "nodeId : " + nodeId + " 위치가 성공적으로 업데이트 됐습니다.");
     }
 
-    @MessageMapping("/move/{projectId}")
-    @SendTo("/topic/move/{projectId}")
+    @MessageMapping("/node/{projectId}")
+    @SendTo("/topic/node/{projectId}")
     public void moveNode(@DestinationVariable String projectId, @Payload CoordinateDTO coordinateDTO) {
 
         // 전달할 메시지 형식으로 변환
-        // 예: 노드 ID와 새 좌표를 포함한 메시지 전송
         SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create();
         headerAccessor.setHeader("projectId", projectId);
 
         // 노드의 ID, x, y를 포함한 응답을 클라이언트에 전송
-        messagingTemplate.convertAndSend("/topic/move/" + projectId, coordinateDTO);
+        messagingTemplate.convertAndSend("/topic/node/" + projectId, coordinateDTO);
     }
 
     @DeleteMapping("/node/{nodeId}")
