@@ -46,9 +46,9 @@ public class ProjectController {
 
         User user = userService.loadMemberByPrincipleDetail(principleDetail);
 
-        Long newProjectId = projectService.saveProject(projectRequestDTO, user);
+        Long projectId = projectService.saveProject(projectRequestDTO, user);
 
-        return ApiResponse.onSuccess(SuccessStatus.CREATED.getCode(), SuccessStatus.CREATED.getMessage(),newProjectId);
+        return ApiResponse.onSuccess(SuccessStatus.CREATED.getCode(), SuccessStatus.CREATED.getMessage(), projectId);
     }
 
     // 전체 프로젝트 보기
