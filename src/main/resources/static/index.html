@@ -38,6 +38,20 @@
             border-color: yellow; /* 움직이는 동안 테두리 색상 변경 */
             border-width: 3px; /* 테두리 두께 변경 */
         }
+
+        /* 노드 생성 폼 스타일 */
+        .node-form-box {
+            border: 2px solid #007bff; /* 박스 테두리 색상 */
+            border-radius: 5px; /* 모서리 둥글게 */
+            padding: 15px; /* 안쪽 여백 */
+            margin: 10px; /* 박스 간격 */
+            display: inline-block; /* 인라인 블록으로 나란히 배치 */
+            width: 200px; /* 박스 너비 */
+            text-align: center; /* 텍스트 가운데 정렬 */
+            position: absolute; /* 위치 조정 가능하도록 설정 */
+            cursor: move; /* 마우스 커서를 드래그 가능으로 변경 */
+        }
+
     </style>
 </head>
 <body>
@@ -53,15 +67,16 @@
 <div id="projectDetails"></div>
 
 <!-- 노드 생성 폼 -->
-<form id="nodeForm" style="display:none;"> <!-- 노드를 표시할 때만 보이도록 설정 -->
-    <label for="prompt">Prompt:</label>
-    <input type="text" id="prompt" required><br>
-
-    <label for="parentNodeId">Parent Node ID:</label>
-    <input type="number" id="parentNodeId"><br>
-
-    <button type="submit">Create Node</button>
-</form>
+<div id="nodeForm" class="node-form-box"> <!-- 박스 형태로 변경 -->
+    <h3>노드 생성</h3>
+    <form id="form">
+        <label for="prompt">프롬프트:</label><br>
+        <input type="text" id="prompt" required><br><br>
+        <label for="parentNodeId">부모 노드 ID:</label><br>
+        <input type="text" id="parentNodeId" required><br><br>
+        <button type="submit">Create Node</button>
+    </form>
+</div>
 
 <div id="nodesContainer" style="display:none;">
     <h2>Nodes:</h2>
@@ -130,10 +145,26 @@
         }, function (frame) {
             console.log('Connected: ' + frame);
 
-            // WebSocket을 통해 노드를 실시간으로 받는 구독 설정
+            // WebSocket을 통해 노드 정보 실시간으로 받는 구독 설정
             stompClient.subscribe(`/topic/project/${projectId}`, function (message) {
                 const newNode = JSON.parse(message.body);
                 addNodeToList(newNode);
+            });
+
+            // WebSocket을 통해 들어온 좌표 데이터를 처리
+            stompClient.subscribe(`/topic/move/${projectId}`, function (message) {
+                const nodeData = JSON.parse(message.body);
+
+                // 전송된 nodeId로 해당 노드 요소를 찾음
+                const nodeElement = document.getElementById(`node-${nodeData.nodeId}`);
+
+                if (nodeElement) {
+                    // 노드의 위치를 새로운 좌표로 업데이트
+                    nodeElement.style.left = `${nodeData.x}px`;
+                    nodeElement.style.top = `${nodeData.y}px`;
+                } else {
+                    console.error(`Node with ID ${nodeData.nodeId} not found.`);
+                }
             });
 
             // WebSocket을 통해 마우스 좌표 수신
@@ -142,11 +173,6 @@
                 updateMouseCursor(mouseData);
             });
 
-            // WebSocket을 통해 노드 움직임 수신
-            stompClient.subscribe(`/topic/move/${projectId}`, function (message) {
-                const moveData = JSON.parse(message.body);
-                moveNode(moveData);
-            });
         });
     }
 
@@ -160,6 +186,66 @@
             stompClient.send(`/app/mouse/${document.getElementById('projectId').value}`, {}, JSON.stringify(mouseData));
         }
     });
+
+    // 드래그 가능한 기능을 추가하는 함수
+    function makeDraggable(element) {
+        let offsetX, offsetY;
+
+        element.addEventListener('mousedown', function(event) {
+            offsetX = event.clientX - element.getBoundingClientRect().left;
+            offsetY = event.clientY - element.getBoundingClientRect().top;
+
+            document.addEventListener('mousemove', dragElement);
+            document.addEventListener('mouseup', stopDrag);
+        });
+
+        function dragElement(event) {
+            element.style.left = `${event.clientX - offsetX}px`;
+            element.style.top = `${event.clientY - offsetY}px`;
+        }
+
+        function stopDrag() {
+            document.removeEventListener('mousemove', dragElement);
+            document.removeEventListener('mouseup', stopDrag);
+        }
+    }
+
+    // 페이지 로드 시 노드 생성 폼 드래그 가능하게 설정
+    window.onload = function() {
+        nodeForm.style.left = '50px'; // 초기 x 좌표 설정
+        nodeForm.style.top = '50px'; // 초기 y 좌표 설정
+        makeDraggable(nodeForm); // 드래그 기능 추가
+
+        const nodeFormElement = document.getElementById('form');
+        nodeFormElement.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const prompt = document.getElementById('prompt').value;
+            const parentNodeId = document.getElementById('parentNodeId').value;
+            const x = parseInt(nodeForm.style.left, 10); // 폼의 현재 x 좌표
+            const y = parseInt(nodeForm.style.top, 10); // 폼의 현재 y 좌표
+
+            fetch('/create-node', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    prompt: prompt,
+                    parentNodeId: parentNodeId,
+                    x: x,
+                    y: y
+                }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Node created:', data);
+                })
+                .catch(error => {
+                    console.error('Error creating node:', error);
+                });
+        });
+    };
 
     function makeNodeDraggable(nodeElement, nodeId) {
         let offsetX, offsetY;
@@ -186,19 +272,47 @@
 
             // 노드 이동 정보를 다른 사용자에게 전송하는 로직 추가 가능
             const nodeData = {
-                id: nodeId,
+                nodeId: nodeId,
                 x: parseInt(nodeElement.style.left, 10),
                 y: parseInt(nodeElement.style.top, 10)
             };
 
             // WebSocket을 통해 다른 사용자에게 노드의 새로운 위치 전송
-            stompClient.send(`/topic/project/${projectId}`, {}, JSON.stringify(nodeData));
+            stompClient.send(`/app/move/${document.getElementById('projectId').value}`, {}, JSON.stringify(nodeData));
         }
 
         // 드래그 종료 함수
         function stopDrag() {
             // 드래그 종료 시 테두리 원래 색으로 되돌리기
             nodeElement.style.border = '2px solid black'; // 원래의 테두리 색으로 복원
+
+            // 현재 노드 좌표를 서버로 전송하여 데이터베이스에 저장
+            const nodeData = {
+                x: parseInt(nodeElement.style.left, 10),
+                y: parseInt(nodeElement.style.top, 10)
+            };
+
+            // 서버로 PATCH 요청을 보내 좌표 업데이트 (데이터베이스에 반영)
+            fetch(`/node/${nodeId}`, {
+                method: 'PATCH',
+                headers: {
+                    "Content-Type": "application/json",
+                    "access": `${localStorage.getItem('access')}` // Access Token 추가
+                },
+                body: JSON.stringify(nodeData)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to update node coordinates in database');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Node coordinates updated:", data);
+                })
+                .catch(error => {
+                    console.error("Error updating node coordinates:", error);
+                });
 
             // 이벤트 리스너 제거
             document.removeEventListener('mousemove', dragNode);
@@ -248,10 +362,16 @@
         const parentNodeId = document.getElementById('parentNodeId').value;
         const projectId = document.getElementById('projectId').value;
 
+        // 현재 마우스 좌표를 가져옴
+        const x = event.clientX; // 마우스의 X 좌표
+        const y = event.clientY; // 마우스의 Y 좌표
+
         const nodeData = {
             prompt: prompt,
             parentNodeId: parentNodeId,
-            projectId: projectId
+            projectId: projectId,
+            x: x, // X 좌표 추가
+            y: y  // Y 좌표 추가
         };
 
         // 서버로 노드 생성 요청
@@ -313,6 +433,7 @@
 
         // 노드를 리스트에 추가
         nodesList.appendChild(nodeElement);
+        console.log(`Node ${node.id} added to the DOM at (${node.x}, ${node.y})`); // Log for debugging
     }
 
 </script>
