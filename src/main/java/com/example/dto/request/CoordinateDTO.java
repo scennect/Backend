@@ -7,13 +7,9 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class NodeRequestDTO {
+public class CoordinateDTO {
 
-    private String prompt;
+    private long nodeId;
     private int x;
     private int y;
-
-    private Long parentNodeId;
-
-    private Long projectId;
 }

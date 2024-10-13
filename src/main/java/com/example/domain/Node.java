@@ -40,6 +40,8 @@ public class Node extends BaseEntity{
     @Builder.Default
     private List<Node> children = new ArrayList<>();
 
+    private int x;
+    private int y;
 
     public void addChild(Node node){
         children.add(node);
@@ -47,6 +49,11 @@ public class Node extends BaseEntity{
 
     public void updateParentNode(Node parentNode){
         this.parentNode = parentNode;
+    }
+
+    public void updateCoordinate(int x, int y){
+        this.x = x;
+        this.y = y;
     }
 
 
