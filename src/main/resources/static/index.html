@@ -3,10 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Node Creation</title>
+    <title>Scennect</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-    <style>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- <link rel="stylesheet" type="text/css" href="/css/style.css"> -->
+    <link rel="stylesheet" type="text/css" href="./css/style.css">
+    <!-- <style>
         .cursor {
             position: absolute;
             width: 10px; /* 커서 크기 조정 */
@@ -51,37 +55,102 @@
             position: absolute; /* 위치 조정 가능하도록 설정 */
             cursor: move; /* 마우스 커서를 드래그 가능으로 변경 */
         }
-
-    </style>
+    </style> -->
 </head>
-<body>
-<h1>Node Creation</h1>
+<body data-bs-theme="dark">
+    <div id="background"></div>
+    <div id="ui">
+        <!-- Project ID 입력 폼 -->
+        <div id="form-ID">
+            <h1>Scennect</h1>
+            <form id="projectForm">
+            
+              <label for="projectId">Project ID:</label>
+              <input id="projectId" class="form-control" placeholder="Project ID" required>
+              
+              <button class="btn btn-secondary" type="submit">Load Project</button>
+          </form>
+        </div>
+    </div>
 
-<!-- Project ID 입력 폼 -->
-<form id="projectForm">
-    <label for="projectId">Project ID:</label>
-    <input type="number" id="projectId" required><br>
-    <button type="submit">Load Project</button>
-</form>
 
 <div id="projectDetails"></div>
 
 <!-- 노드 생성 폼 -->
 <div id="nodeForm" class="node-form-box"> <!-- 박스 형태로 변경 -->
-    <h3>노드 생성</h3>
+    <h3>Generate New Img</h3>
     <form id="form">
-        <label for="prompt">프롬프트:</label><br>
-        <input type="text" id="prompt" required><br><br>
-        <label for="parentNodeId">부모 노드 ID:</label><br>
-        <input type="text" id="parentNodeId" required><br><br>
-        <button type="submit">Create Node</button>
+        <!-- <label for="prompt">프롬프트:</label>
+        <input type="text" id="prompt" required>
+        <label for="parentNodeId">부모 노드 ID:</label>
+        <textarea type="text" id="parentNodeId" required></textarea>
+        <button type="submit">Create Node</button> -->
+
+        <label for="parentNodeId">Parent Node ID:</label>
+        <input id="parentNodeId" class="form-control" placeholder="Parent Node ID">
+        <label for="prompt">Prompt:</label>
+        <textarea type="text" id="prompt" class="form-control" placeholder="Prompt" required></textarea>
+        <button class="btn generateBtn btn-primary" type="submit">Create Node</button>
     </form>
 </div>
 
-<div id="nodesContainer" style="display:none;">
+<div id="nodesContainer" style="display:inherit;">
     <h2>Nodes:</h2>
-    <div id="nodesList"></div> <!-- 리스트를 div로 감싸서 박스 형태로 변경 -->
+    <div id="nodesList">
+
+        <div id="node-0" class="node-box test" style="top: 400px; left: 600px;">
+            <div class="btn-wrap-close" onclick="deleteNode('node-0')"><button type="button" class="btn-close" aria-label="Close"></button></div>
+            <div class="info">
+                <p>Prompt:</p>
+                <div class="prompt">Apple on the Table, oil painting</div>
+            </div>
+            <img src="https://hongik-s3.s3.amazonaws.com/42_10_7.5.png" alt="test node1" style="height: auto;">
+        </div>
+
+
+    </div> <!-- 리스트를 div로 감싸서 박스 형태로 변경 -->
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+<script>
+    const background = document.getElementById('background');
+    let isDragging = false;
+    let startX, startY, scrollLeft, scrollTop;
+
+    background.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      background.style.cursor = 'grabbing';
+      startX = e.pageX - background.offsetLeft;
+      startY = e.pageY - background.offsetTop;
+      scrollLeft = window.scrollX;
+      scrollTop = window.scrollY;
+    });
+
+    background.addEventListener('mouseleave', () => {
+      isDragging = false;
+      background.style.cursor = 'grab';
+    });
+
+    background.addEventListener('mouseup', () => {
+      isDragging = false;
+      background.style.cursor = 'grab';
+    });
+
+    background.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      e.preventDefault();
+      const x = e.pageX - startX;
+      const y = e.pageY - startY;
+      window.scrollTo(scrollLeft - x, scrollTop - y);
+    });
+</script>
+
+
+
+
+
+
 
 <script>
     const projectForm = document.getElementById('projectForm');
@@ -234,8 +303,8 @@
 
     // 페이지 로드 시 노드 생성 폼 드래그 가능하게 설정
     window.onload = function() {
-        nodeForm.style.left = '50px'; // 초기 x 좌표 설정
-        nodeForm.style.top = '50px'; // 초기 y 좌표 설정
+        nodeForm.style.left = '10vw'; // 초기 x 좌표 설정
+        nodeForm.style.top = '30vh'; // 초기 y 좌표 설정
         makeDraggable(nodeForm); // 드래그 기능 추가
 
         const nodeFormElement = document.getElementById('form');
@@ -407,18 +476,24 @@
         nodeElement.id = `node-${node.id}`; // 각 노드에 고유 ID 추가
         nodeElement.className = 'node-box'; // CSS 스타일 적용을 위한 클래스
 
-        // 노드의 스타일 설정
-        nodeElement.style.position = 'absolute'; // 절대 위치 설정
+        // 노드의 스타일 설정 // nodeStyle
+        //nodeElement.style.position = 'absolute'; // 절대 위치 설정
         nodeElement.style.left = `${node.x}px`; // 초기 x 좌표 설정
         nodeElement.style.top = `${node.y}px`; // 초기 y 좌표 설정
-        nodeElement.style.border = '2px solid black'; // 테두리 설정
-        nodeElement.style.padding = '10px'; // 패딩 추가
-        nodeElement.style.margin = '5px'; // 마진 추가
-        nodeElement.style.backgroundColor = 'white'; // 배경색 설정
-        nodeElement.style.zIndex = '10'; // z-index 설정으로 다른 요소 위에 보이게
+        //nodeElement.style.border = '2px solid black'; // 테두리 설정
+        //nodeElement.style.padding = '10px'; // 패딩 추가
+        //nodeElement.style.margin = '5px'; // 마진 추가
+        //nodeElement.style.backgroundColor = 'white'; // 배경색 설정
+        //nodeElement.style.zIndex = '10'; // z-index 설정으로 다른 요소 위에 보이게
 
-        // 노드 내용을 추가
-        nodeElement.innerHTML = `<h3>${node.prompt}</h3>`; // 노드의 프롬프트 추가
+        // // 노드 내용을 추가
+        // nodeElement.innerHTML = `<h3>${node.prompt}</h3>`; // 노드의 프롬프트 추가
+        // nodeElement.innerHTML = `<div class="btn-wrap-close"><button type="button" class="btn-close" aria-label="Close"></button></div>`; // 삭제버튼 추가
+        //nodeElement.innerHTML = `<div class="info"><p>Prompt:</p><div class="prompt">${node.prompt}</div></div>`; // 노드의 프롬프트 추가
+
+        
+
+        nodeElement.innerHTML = `<div class="btn-wrap-close" onclick="deleteNode('node-${node.id}', ${node.id})"><button type="button" class="btn-close" aria-label="Close"></button></div><div class="info"><p>Prompt:</p><div class="prompt">${node.prompt}</div></div>`;
 
         // 이미지 URL이 있으면 이미지 태그 추가
         if (node.imageURL) {
@@ -426,19 +501,46 @@
             const cleanImageURL = node.imageURL.replace(/['"]+/g, ''); // URL에서 따옴표 제거
             imageElement.src = cleanImageURL; // 수정된 URL 사용
             imageElement.alt = node.prompt;
-            imageElement.style.width = '100px'; // 이미지 너비 설정
+            imageElement.style.width = '100%'; // 이미지 너비 설정
             imageElement.style.height = 'auto'; // 높이는 자동으로 설정
             nodeElement.appendChild(imageElement); // 노드 박스에 이미지 추가
         }
+
 
         // 노드 드래그 가능하도록 설정
         makeNodeDraggable(nodeElement, node.id);
 
         // 노드를 리스트에 추가
         nodesList.appendChild(nodeElement);
-        console.log(`Node ${node.id} added to the DOM at (${node.x}, ${node.y})`); // Log for debugging
+        //console.log(`Node ${node.id} added to the DOM at (${node.x}, ${node.y})`); // Log for debugging
     }
 
+    // 노드 지우기 함수
+    function deleteNode(nodeID, nodeIdNumOnly) {
+        console.log("deleteNode");
+        // DELETE API 호출
+        fetch(`/node/${nodeIdNumOnly}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                "access": `${localStorage.getItem('access')}` // Access Token 추가
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log("Node deleted successfully.");
+                // Node 삭제
+                document.getElementById(nodeID).remove();
+            } else {
+                return response.json().then(err => {
+                    console.error("Failed to delete node:", err.message);
+                });
+            }
+        })
+        .catch(error => {
+            console.error("Error deleting node:", error);
+        });
+    }
 </script>
 </body>
 </html>
