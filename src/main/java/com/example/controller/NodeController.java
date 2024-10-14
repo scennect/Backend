@@ -91,13 +91,17 @@ public class NodeController {
         messagingTemplate.convertAndSend("/topic/node/" + projectId, coordinateDTO);
     }
 
-    @DeleteMapping("/node/{nodeId}")
-    public ApiResponse<String> newNode(@AuthenticationPrincipal PrincipleDetail principleDetail,
-                                       @PathVariable("nodeId") Long nodeId) {
+    @DeleteMapping("/project/{projectId}/node/{nodeId}")
+    public ApiResponse<String> deleteNode(@AuthenticationPrincipal PrincipleDetail principleDetail,
+                                          @PathVariable("projectId") Long projectId,
+                                          @PathVariable("nodeId") Long nodeId) {
 
         User user = userService.findUserByUsername(principleDetail.getUsername());
 
         nodeService.DeleteNodeByIdAndUser(nodeId, user);
+
+        // 노드 삭제 후 해당 프로젝트에 삭제 이벤트 알림
+        messagingTemplate.convertAndSend("/topic/delete/" + projectId, nodeId);
 
         return ApiResponse.onSuccess(SuccessStatus.OK.getCode(), SuccessStatus.OK.getMessage(), "Node successfully deleted");
     }
