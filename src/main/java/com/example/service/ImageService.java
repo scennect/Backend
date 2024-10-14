@@ -12,4 +12,6 @@ public interface ImageService {
 
     public String generateImageToImage(String prompt, String imageURL);
 
+    public void deleteS3Image(String imageURL);
+
 }
