@@ -58,20 +58,20 @@
     </style> -->
 </head>
 <body data-bs-theme="dark">
-    <div id="background"></div>
-    <div id="ui">
-        <!-- Project ID 입력 폼 -->
-        <div id="form-ID">
-            <h1>Scennect</h1>
-            <form id="projectForm">
-            
-              <label for="projectId">Project ID:</label>
-              <input id="projectId" class="form-control" placeholder="Project ID" required>
-              
-              <button class="btn btn-secondary" type="submit">Load Project</button>
-          </form>
-        </div>
+<div id="background"></div>
+<div id="ui">
+    <!-- Project ID 입력 폼 -->
+    <div id="form-ID">
+        <h1>Scennect</h1>
+        <form id="projectForm">
+
+            <label for="projectId">Project ID:</label>
+            <input id="projectId" class="form-control" placeholder="Project ID" required>
+
+            <button class="btn btn-secondary" type="submit">Load Project</button>
+        </form>
     </div>
+</div>
 
 
 <div id="projectDetails"></div>
@@ -119,30 +119,30 @@
     let startX, startY, scrollLeft, scrollTop;
 
     background.addEventListener('mousedown', (e) => {
-      isDragging = true;
-      background.style.cursor = 'grabbing';
-      startX = e.pageX - background.offsetLeft;
-      startY = e.pageY - background.offsetTop;
-      scrollLeft = window.scrollX;
-      scrollTop = window.scrollY;
+        isDragging = true;
+        background.style.cursor = 'grabbing';
+        startX = e.pageX - background.offsetLeft;
+        startY = e.pageY - background.offsetTop;
+        scrollLeft = window.scrollX;
+        scrollTop = window.scrollY;
     });
 
     background.addEventListener('mouseleave', () => {
-      isDragging = false;
-      background.style.cursor = 'grab';
+        isDragging = false;
+        background.style.cursor = 'grab';
     });
 
     background.addEventListener('mouseup', () => {
-      isDragging = false;
-      background.style.cursor = 'grab';
+        isDragging = false;
+        background.style.cursor = 'grab';
     });
 
     background.addEventListener('mousemove', (e) => {
-      if (!isDragging) return;
-      e.preventDefault();
-      const x = e.pageX - startX;
-      const y = e.pageY - startY;
-      window.scrollTo(scrollLeft - x, scrollTop - y);
+        if (!isDragging) return;
+        e.preventDefault();
+        const x = e.pageX - startX;
+        const y = e.pageY - startY;
+        window.scrollTo(scrollLeft - x, scrollTop - y);
     });
 </script>
 
@@ -307,35 +307,35 @@
         nodeForm.style.top = '30vh'; // 초기 y 좌표 설정
         makeDraggable(nodeForm); // 드래그 기능 추가
 
-        const nodeFormElement = document.getElementById('form');
-        nodeFormElement.addEventListener('submit', function(event) {
-            event.preventDefault();
+        // const nodeFormElement = document.getElementById('form');
+        // nodeFormElement.addEventListener('submit', function(event) {
+        //     event.preventDefault();
 
-            const prompt = document.getElementById('prompt').value;
-            const parentNodeId = document.getElementById('parentNodeId').value;
-            const x = parseInt(nodeForm.style.left, 10); // 폼의 현재 x 좌표
-            const y = parseInt(nodeForm.style.top, 10); // 폼의 현재 y 좌표
+        //     const prompt = document.getElementById('prompt').value;
+        //     const parentNodeId = document.getElementById('parentNodeId').value;
+        //     const x = parseInt(nodeForm.style.left, 10); // 폼의 현재 x 좌표
+        //     const y = parseInt(nodeForm.style.top, 10); // 폼의 현재 y 좌표
 
-            fetch('/create-node', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    prompt: prompt,
-                    parentNodeId: parentNodeId,
-                    x: x,
-                    y: y
-                }),
-            })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Node created:', data);
-                })
-                .catch(error => {
-                    console.error('Error creating node:', error);
-                });
-        });
+        //     fetch('/create-node', {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //         },
+        //         body: JSON.stringify({
+        //             prompt: prompt,
+        //             parentNodeId: parentNodeId,
+        //             x: x,
+        //             y: y
+        //         }),
+        //     })
+        //         .then(response => response.json())
+        //         .then(data => {
+        //             console.log('Node created:', data);
+        //         })
+        //         .catch(error => {
+        //             console.error('Error creating node:', error);
+        //         });
+        // });
     };
 
     function makeNodeDraggable(nodeElement, nodeId) {
@@ -491,7 +491,7 @@
         // nodeElement.innerHTML = `<div class="btn-wrap-close"><button type="button" class="btn-close" aria-label="Close"></button></div>`; // 삭제버튼 추가
         //nodeElement.innerHTML = `<div class="info"><p>Prompt:</p><div class="prompt">${node.prompt}</div></div>`; // 노드의 프롬프트 추가
 
-        
+
 
         nodeElement.innerHTML = `<div class="btn-wrap-close" onclick="deleteNode('node-${node.id}', ${node.id})"><button type="button" class="btn-close" aria-label="Close"></button></div><div class="info"><p>Prompt:</p><div class="prompt">${node.prompt}</div></div>`;
 
@@ -526,20 +526,20 @@
                 "access": `${localStorage.getItem('access')}` // Access Token 추가
             }
         })
-        .then(response => {
-            if (response.ok) {
-                console.log("Node deleted successfully.");
-                // Node 삭제
-                document.getElementById(nodeID).remove();
-            } else {
-                return response.json().then(err => {
-                    console.error("Failed to delete node:", err.message);
-                });
-            }
-        })
-        .catch(error => {
-            console.error("Error deleting node:", error);
-        });
+            .then(response => {
+                if (response.ok) {
+                    console.log("Node deleted successfully.");
+                    // Node 삭제
+                    document.getElementById(nodeID).remove();
+                } else {
+                    return response.json().then(err => {
+                        console.error("Failed to delete node:", err.message);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error deleting node:", error);
+            });
     }
 </script>
 </body>
