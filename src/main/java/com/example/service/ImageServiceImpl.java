@@ -29,7 +29,7 @@ public class ImageServiceImpl implements ImageService{
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        String url = "http://localhost:8000/generate-image";  // FastAPI 서버의 URL
+        String url = "http://124.55.57.87:8000/generate-image";  // FastAPI 서버의 URL
 
         String requestBody = "{\"prompt\": \"" + prompt + "\"}";
 
@@ -37,7 +37,9 @@ public class ImageServiceImpl implements ImageService{
 
         try {
             // FastAPI 서버에 POST 요청을 보내 이미지 생성
+            log.info("generate-image 요청 시작");
             ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class);
+            log.info("generate-image 요청 완료");
             return response.getBody();
         } catch (Exception e) {
             log.error("Failed to generate image: {}", e.getMessage());
@@ -51,7 +53,7 @@ public class ImageServiceImpl implements ImageService{
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        String url = "http://localhost:8000/modify-image";  // FastAPI 서버의 URL
+        String url = "http://124.55.57.87:8000/modify-image";  // FastAPI 서버의 URL
 
         String requestBody = "{\"prompt\": \"" + prompt + "\", \"imageURL\": " + imageURL + "}";
 
@@ -59,7 +61,9 @@ public class ImageServiceImpl implements ImageService{
 
         try {
             // FastAPI 서버에 POST 요청을 보내 이미지 생성
+            log.info("modify-image 요청 시작");
             ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class);
+            log.info("modify-image 요청 끝");
             return response.getBody();
         } catch (Exception e) {
             log.error("Failed to generate image: {}", e.getMessage());
