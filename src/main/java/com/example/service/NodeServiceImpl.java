@@ -66,6 +66,11 @@ public class NodeServiceImpl implements NodeService{
         // save new node
         Node saveNode = nodeRepository.save(newNode);
 
+        // 만약 프로젝트 대표 이미지가 없으면 새로 생성한 노드의 이미지로 설정
+        if(project.getProjectImageURL().isBlank()){
+            project.updateProjectImageURL(saveNode.getImageURL());
+        }
+
         // DTO로 반환해서 return
         return NodeConverter.toNodeResponseDTO(saveNode);
     }
