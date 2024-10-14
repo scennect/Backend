@@ -40,7 +40,8 @@ public class SecurityConfig {
                     .requestMatchers("/join",
                             "/index.html", "/login.html", "/favicon.ico",
                             "/topic/**", "/app/**", "/ws/**",
-                            "/api-docs/**", "/swagger-ui/**", "/swagger-ui.html/**", "/v3/api-docs/**", "/swagger-ui/index.html#/**");// 필터를 타면 안되는 경로
+                            "/api-docs/**", "/swagger-ui/**", "/swagger-ui.html/**", "/v3/api-docs/**", "/swagger-ui/index.html#/**",
+                            "/css/**", "/js/**", "/img/**");// 필터를 타면 안되는 경로
         };
     }
 

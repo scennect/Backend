@@ -1,0 +1,284 @@
+@charset "UTF-8";
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
+*, p, h1, h2, h3, h4, h5, h6, a, button, input, textarea, label, i, ul, li, dl, dt, dd {
+  font-family: "Pretendard";
+  margin: 0;
+  padding: 0;
+}
+
+body, html {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+#background {
+  background: linear-gradient(to bottom, transparent 23px, #3d3d3d 23px) 0 0/200vw 24px repeat-y, linear-gradient(to right, transparent 23px, #3d3d3d 23px) 0 0/24px 200vh repeat-x #333333;
+  position: absolute;
+  cursor: grab;
+  width: 200vw;
+  height: 200vh;
+  margin: 0;
+}
+
+.cursor {
+  position: absolute;
+  width: 10px; /* 커서 크기 조정 */
+  height: 10px; /* 커서 크기 조정 */
+  background: red; /* 커서 색상 */
+  border-radius: 50%; /* 원형으로 만들기 */
+  pointer-events: none; /* 클릭 이벤트 차단 */
+  z-index: 1000; /* 다른 요소 위에 표시 */
+}
+
+.node-image {
+  max-width: 100%; /* 이미지가 박스를 넘어가지 않도록 조정 */
+  height: auto; /* 비율 유지 */
+}
+
+.moving {
+  border-color: yellow; /* 움직이는 동안 테두리 색상 변경 */
+  border-width: 3px; /* 테두리 두께 변경 */
+}
+
+.btn-primary {
+  padding: 8px 16px;
+  background: #00aeff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 8px;
+}
+.btn-primary:hover {
+  background: #0077cc;
+}
+
+#ui {
+  user-drag: none;
+  -webkit-user-drag: none;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  position: fixed;
+  min-width: 500px;
+  top: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.6);
+  -webkit-backdrop-filter: blur(4px);
+          backdrop-filter: blur(4px);
+  z-index: 1000;
+  border-radius: 0 0 2rem 0;
+}
+#ui * {
+  color: white;
+}
+#ui h1 {
+  font-size: 2.25rem;
+  margin-bottom: 12px;
+  letter-spacing: -1px;
+}
+
+input, textarea {
+  background-color: #252525 !important;
+}
+input:hover, textarea:hover {
+  background-color: #313131 !important;
+  border-color: #00aeff !important;
+}
+
+#form-ID {
+  padding: 2rem;
+}
+#form-ID #projectForm {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  border-radius: 0rem;
+  overflow: hidden;
+  padding-bottom: 0.5rem;
+}
+#form-ID #projectForm input {
+  background-color: transparent !important;
+  border-radius: 0px;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: none;
+  padding: 0px 0px;
+  margin-right: 0.75rem;
+}
+#form-ID #projectForm label {
+  font-size: 0.85rem;
+  word-break: keep-all;
+  min-width: 80px;
+  display: none;
+}
+#form-ID #projectForm input::-moz-placeholder {
+  font-weight: 300;
+  color: #ffffff;
+  opacity: 0.25;
+}
+#form-ID #projectForm input::placeholder {
+  font-weight: 300;
+  color: #ffffff;
+  opacity: 0.25;
+}
+#form-ID #projectForm .btn {
+  font-size: 0.75rem;
+  margin: 0;
+  min-width: 100px;
+  border-radius: 5rem;
+  background-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.4);
+}
+
+#nodeForm {
+  transition: ease-in-out 0.2s;
+  border: 1px solid rgba(0, 0, 0, 0.6);
+  position: absolute;
+  width: -moz-fit-content;
+  width: fit-content;
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.6);
+  -webkit-backdrop-filter: blur(4px);
+          backdrop-filter: blur(4px);
+}
+#nodeForm:hover {
+  border: 1px solid #00aeff;
+}
+#nodeForm h3 {
+  font-size: 1.5rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 0.75rem;
+  width: 100%;
+}
+#nodeForm form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+#nodeForm input, #nodeForm textarea {
+  border-radius: 1.5rem;
+  border: none;
+  border-width: 1px;
+  box-shadow: none;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 6px 20px;
+  margin-bottom: 1rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+#nodeForm textarea {
+  resize: none;
+  min-height: 200px;
+  padding: 12px 20px;
+}
+#nodeForm label {
+  font-size: 0.85rem;
+  word-break: keep-all;
+  min-width: 80px;
+  display: none;
+}
+#nodeForm input::-moz-placeholder, #nodeForm textarea::-moz-placeholder {
+  font-weight: 300;
+  color: #ffffff;
+  opacity: 0.25;
+}
+#nodeForm input::placeholder, #nodeForm textarea::placeholder {
+  font-weight: 300;
+  color: #ffffff;
+  opacity: 0.25;
+}
+#nodeForm .btn {
+  font-size: 0.9rem;
+  margin: 0;
+  min-width: 100px;
+  width: 100%;
+  border-radius: 5rem;
+  padding: 1rem 2rem;
+}
+
+.node-box {
+  user-drag: none;
+  -webkit-user-drag: none;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  transition: ease-in-out 0.2s;
+  border: 1px solid rgba(0, 0, 0, 0.6);
+  border-radius: 1rem; /* 박스 모서리 둥글게 */
+  width: 200px; /* 박스 너비 */
+  position: absolute; /* 위치 조정 가능하도록 설정 */
+  cursor: move; /* 마우스 커서를 드래그 가능으로 변경 */
+  overflow: hidden;
+  background: rgb(17, 17, 17);
+  -webkit-backdrop-filter: blur(4px);
+          backdrop-filter: blur(4px);
+  position: absolute;
+  z-index: 10;
+  display: flex;
+  flex-direction: column-reverse;
+}
+.node-box:hover {
+  border: 1px solid #00aeff;
+}
+.node-box .btn-wrap-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0.5rem;
+  border-radius: 10rem;
+  background-color: rgba(0, 0, 0, 0.3);
+  -webkit-backdrop-filter: blur(4px);
+          backdrop-filter: blur(4px);
+  transition: 0.2s ease-in;
+}
+.node-box .btn-wrap-close .btn-close {
+  margin: 4px;
+  font-size: 0.75rem;
+}
+.node-box .btn-wrap-close .btn-close:focus {
+  box-shadow: none;
+}
+.node-box .btn-wrap-close:hover {
+  transition: 0.2s ease-in;
+  background-color: rgba(0, 0, 0, 0.6);
+}
+.node-box .info {
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  width: 100%;
+}
+.node-box .info p {
+  font-size: 0.5rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+.node-box .info .prompt {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+.node-box .node-image {
+  user-drag: none;
+  -webkit-user-drag: none;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+
+#svgContainer {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}/*# sourceMappingURL=style.css.map */
