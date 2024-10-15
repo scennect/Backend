@@ -42,18 +42,18 @@ public class NodeServiceImpl implements NodeService{
         Long parentNodeId = nodeRequestDto.getParentNodeId();
         if (parentNodeId != null) {
             parentNode = findNodeById(nodeRequestDto.getParentNodeId());
-            //imageURL = imageService.generateImageToImage(nodeRequestDto.getPrompt(), parentNode.getImageURL());
+            imageURL = imageService.generateImageToImage(nodeRequestDto.getPrompt(), parentNode.getImageURL());
 
             // 로컬에서 위에 generateImage 없이 돌릴때 사용할 용도
-            imageURL = "https://hongik-s3.s3.amazonaws.com/42_10_7.5.png";
+            //imageURL = "https://hongik-s3.s3.amazonaws.com/42_10_7.5.png";
 
 
         }
         else {
-            //imageURL = imageService.generateTextToImage(nodeRequestDto.getPrompt());
+            imageURL = imageService.generateTextToImage(nodeRequestDto.getPrompt());
 
             // 로컬에서 위에 generateImage 없이 돌릴때 사용할 용도
-            imageURL = "https://hongik-s3.s3.amazonaws.com/42_10_7.5.png";
+            //imageURL = "https://hongik-s3.s3.amazonaws.com/42_10_7.5.png";
         }
 
         // build new node
