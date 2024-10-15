@@ -67,7 +67,7 @@ public class SecurityConfig {
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                         CorsConfiguration corsConfiguration = new CorsConfiguration();
 
-                        corsConfiguration.setAllowedOrigins(Collections.singletonList("http://52.78.73.212:8080"));
+                        corsConfiguration.addAllowedOrigin("http://52.78.73.212:8000");
 
                         // GET, POST, PUT, DELETE, PATCH 등 모든 메소드 허용
                         corsConfiguration.setAllowedMethods(Collections.singletonList("*"));
