@@ -67,8 +67,7 @@ public class SecurityConfig {
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                         CorsConfiguration corsConfiguration = new CorsConfiguration();
 
-                        //프론트 단에서 요청을 보낼 주소
-                        corsConfiguration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+                        corsConfiguration.setAllowedOrigins(Collections.singletonList("http://52.78.73.212:8080"));
 
                         // GET, POST, PUT, DELETE, PATCH 등 모든 메소드 허용
                         corsConfiguration.setAllowedMethods(Collections.singletonList("*"));
