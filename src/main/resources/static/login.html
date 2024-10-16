@@ -32,7 +32,7 @@
             password: password,
         };
 
-        fetch("/login2", {
+        fetch("/login", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -43,17 +43,17 @@
                 if (!response.ok) {
                     throw new Error('Login failed');
                 }
-                //
-                // // Extract the access token from response headers
-                // const accessToken = response.headers.get('access');
-                // console.log("Access Token from headers:", accessToken);
-                //
-                // // Store the access token in localStorage
-                // if (accessToken) {
-                //     localStorage.setItem("access", accessToken);
-                // } else {
-                //     throw new Error('Access token not found in response headers');
-                // }
+
+                // Extract the access token from response headers
+                const accessToken = response.headers.get('access');
+                console.log("Access Token from headers:", accessToken);
+
+                // Store the access token in localStorage
+                if (accessToken) {
+                    localStorage.setItem("access", accessToken);
+                } else {
+                    throw new Error('Access token not found in response headers');
+                }
 
                 return response.json();  // Assuming the server sends a JSON response
             })
