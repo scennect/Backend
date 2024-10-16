@@ -1,9 +1,12 @@
 package com.example.controller;
 
 import com.example.apiPayload.ApiResponse;
+import com.example.apiPayload.code.status.ErrorStatus;
 import com.example.apiPayload.code.status.SuccessStatus;
 import com.example.dto.JoinDTO;
+import com.example.dto.LoginResponseDTO;
 import com.example.dto.MouseDTO;
+import com.example.dto.UserLoginDTO;
 import com.example.service.TokenService;
 import com.example.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,6 +34,20 @@ public class UserController {
     public ApiResponse<String> join(@RequestBody JoinDTO joinDTO) {
         userService.join(joinDTO);
         return ApiResponse.onSuccess(SuccessStatus.OK.getCode(), SuccessStatus.OK.getMessage(), "Join Success");
+    }
+
+    @PostMapping("/login2")
+    public ApiResponse<String> login(@RequestBody UserLoginDTO userLoginDTO){
+        try {
+            // 서비스로 비즈니스 로직 위임
+            LoginResponseDTO loginResponse = userService.authenticateAndGenerateTokens(userLoginDTO);
+
+            return ApiResponse.onSuccess(SuccessStatus.OK.getCode(), SuccessStatus.OK.getMessage(), "Login Success");
+
+        } catch (Exception e) {
+            // 인증 실패 시 에러 응답 처리
+            return ApiResponse.onFailure(ErrorStatus._BAD_REQUEST.getCode(), ErrorStatus._BAD_REQUEST.getMessage(), "Login Failure");
+        }
     }
 
     @PostMapping("/reissue")
