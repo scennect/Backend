@@ -98,13 +98,17 @@ public class SecurityConfig {
         //경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/", "/login", "/join", "/reissue",
+                        .requestMatchers("/login").permitAll()
+
+                        .requestMatchers("/", "/join", "/reissue",
                                 "/index.html", "/login.html", "/favicon.ico",
                                 "/topic/**", "/app/**", "/ws/**").permitAll()
-                        .requestMatchers("/node/**", "/mypage", "/project/**").hasRole("USER")
-                        .requestMatchers( "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
-                        .anyRequest().authenticated());
+                        .requestMatchers("/node/**", "/mypage", "/project/**").hasRole("USER")
+
+                        .requestMatchers( "/swagger-ui/**", "/v3/api-docs/**").permitAll());
+
+//                        .anyRequest().authenticated());
 
         //JWTFilter 추가
         http
