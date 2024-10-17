@@ -263,6 +263,12 @@
                 cursorElement.style.top = `${y}px`;
             });
 
+            // 노드 삭제 이벤트 구독
+            stompClient.subscribe(`/topic/delete/${projectId}`, function (message) {
+                const nodeId = message.body; // 서버로부터 삭제된 nodeId를 받음
+                deleteNodeElement(nodeId); // 해당 노드를 삭제하는 함수 호출
+            });
+
         });
     }
 
@@ -493,7 +499,7 @@
 
 
 
-        nodeElement.innerHTML = `<div class="btn-wrap-close" onclick="deleteNode('node-${node.id}', ${node.id})"><button type="button" class="btn-close" aria-label="Close"></button></div><div class="info"><p>Prompt:</p><div class="prompt">${node.prompt}</div></div>`;
+        nodeElement.innerHTML = `<div class="btn-wrap-close" onclick="deleteNode('node-${node.id}', ${node.id}, document.getElementById('projectId').value)"><button type="button" class="btn-close" aria-label="Close"></button></div><div class="info"><p>Prompt:</p><div class="prompt">${node.prompt}</div></div>`;
 
         // 이미지 URL이 있으면 이미지 태그 추가
         if (node.imageURL) {
@@ -515,11 +521,22 @@
         //console.log(`Node ${node.id} added to the DOM at (${node.x}, ${node.y})`); // Log for debugging
     }
 
+    // 노드 삭제됐을때 웹소켓으로 받은 노드 삭제
+    function deleteNodeElement(nodeID) {
+        const nodeElement = document.getElementById(`node-${nodeID}`);
+        if (nodeElement) {
+            nodeElement.remove();
+            console.log(`Node with ID ${nodeID} deleted from DOM.`);
+        } else {
+            console.error(`Node with ID ${nodeID} not found.`);
+        }
+    }
+
     // 노드 지우기 함수
-    function deleteNode(nodeID, nodeIdNumOnly) {
+    function deleteNode(nodeID, nodeIdNumOnly, projectId) {
         console.log("deleteNode");
         // DELETE API 호출
-        fetch(`/node/${nodeIdNumOnly}`, {
+        fetch(`/project/${projectId}/node/${nodeIdNumOnly}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',

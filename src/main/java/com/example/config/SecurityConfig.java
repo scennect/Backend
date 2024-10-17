@@ -67,8 +67,7 @@ public class SecurityConfig {
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                         CorsConfiguration corsConfiguration = new CorsConfiguration();
 
-                        //프론트 단에서 요청을 보낼 주소
-                        corsConfiguration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+                        corsConfiguration.addAllowedOrigin("http://52.78.73.212:8000");
 
                         // GET, POST, PUT, DELETE, PATCH 등 모든 메소드 허용
                         corsConfiguration.setAllowedMethods(Collections.singletonList("*"));
@@ -99,13 +98,17 @@ public class SecurityConfig {
         //경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/", "/login", "/join", "/reissue",
+                        .requestMatchers("/login").permitAll()
+
+                        .requestMatchers("/", "/join", "/reissue",
                                 "/index.html", "/login.html", "/favicon.ico",
                                 "/topic/**", "/app/**", "/ws/**").permitAll()
-                        .requestMatchers("/node/**", "/mypage", "/project/**").hasRole("USER")
-                        .requestMatchers( "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
-                        .anyRequest().authenticated());
+                        .requestMatchers("/node/**", "/mypage", "/project/**").hasRole("USER")
+
+                        .requestMatchers( "/swagger-ui/**", "/v3/api-docs/**").permitAll());
+
+//                        .anyRequest().authenticated());
 
         //JWTFilter 추가
         http

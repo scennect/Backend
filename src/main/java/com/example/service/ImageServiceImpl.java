@@ -1,7 +1,9 @@
 package com.example.service;
 
+import com.amazonaws.SdkClientException;
 import com.example.apiPayload.code.status.ErrorStatus;
 import com.example.apiPayload.exception.GeneralException;
+import com.example.config.S3Config;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +24,10 @@ import java.util.UUID;
 public class ImageServiceImpl implements ImageService{
 
     private final RestTemplate restTemplate;
+
+    private final S3Config s3Config;
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucketName;
 
     @Override
     public String generateTextToImage(String prompt) {
@@ -53,7 +59,7 @@ public class ImageServiceImpl implements ImageService{
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        String url = "https://82d0-124-55-57-87.ngrok-free.app//modify-image";  // FastAPI 서버의 URL
+        String url = "https://2b6a-124-55-57-87.ngrok-free.app/modify-image";  // FastAPI 서버의 URL
 
         String requestBody = "{\"prompt\": \"" + prompt + "\", \"imageURL\": " + imageURL + "}";
 
@@ -68,6 +74,18 @@ public class ImageServiceImpl implements ImageService{
         } catch (Exception e) {
             log.error("Failed to generate image: {}", e.getMessage());
             throw new GeneralException(ErrorStatus.IMAGE_GENERATE_FAILURE);
+        }
+    }
+
+    @Override
+    public void deleteS3Image(String imageURL) {
+        String filename = imageURL.substring(imageURL.lastIndexOf("/") + 1);
+        log.info("delete filename = " + filename);
+        try{
+            s3Config.amazonS3Client().deleteObject(bucketName, filename);
+        }catch (SdkClientException e){
+            log.warn("S3 삭제에 실패했습니다.");
+            throw new GeneralException(ErrorStatus.IMAGE_DELETE_FAILURE);
         }
     }
 

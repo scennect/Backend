@@ -67,7 +67,7 @@ public class NodeServiceImpl implements NodeService{
         Node saveNode = nodeRepository.save(newNode);
 
         // 만약 프로젝트 대표 이미지가 없으면 새로 생성한 노드의 이미지로 설정
-        if(project.getProjectImageURL().isBlank()){
+        if(project.getProjectImageURL() == null){
             project.updateProjectImageURL(saveNode.getImageURL());
         }
 
@@ -79,6 +79,8 @@ public class NodeServiceImpl implements NodeService{
     public void DeleteNodeByIdAndUser(Long nodeId, User user) {
         // nodeId 로 node 찾기
         Node findNode = findNodeById(nodeId);
+
+        imageService.deleteS3Image(findNode.getImageURL());
 
         // node 생성자 인지 확인
         if (!findNode.getUser().equals(user)) {
