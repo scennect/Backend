@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scennect</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- <link rel="stylesheet" type="text/css" href="/css/style.css"> -->
+    <link rel="stylesheet" type="text/css" href="./css/style.css?v=1.1">
+    <!-- <style>
+        .cursor {
+            position: absolute;
+            width: 10px; /* 커서 크기 조정 */
+            height: 10px; /* 커서 크기 조정 */
+            background: red; /* 커서 색상 */
+            border-radius: 50%; /* 원형으로 만들기 */
+            pointer-events: none; /* 클릭 이벤트 차단 */
+            z-index: 1000; /* 다른 요소 위에 표시 */
+        }
+
+        .node-box {
+            border: 2px solid #ccc; /* 박스 테두리 */
+            border-radius: 5px; /* 박스 모서리 둥글게 */
+            padding: 10px; /* 안쪽 여백 */
+            margin: 10px; /* 박스 간격 */
+            display: inline-block; /* 인라인 블록으로 나란히 배치 */
+            width: 150px; /* 박스 너비 */
+            text-align: center; /* 텍스트 가운데 정렬 */
+            position: absolute; /* 위치 조정 가능하도록 설정 */
+            cursor: move; /* 마우스 커서를 드래그 가능으로 변경 */
+        }
+
+        .node-image {
+            max-width: 100%; /* 이미지가 박스를 넘어가지 않도록 조정 */
+            height: auto; /* 비율 유지 */
+        }
+
+        .moving {
+            border-color: yellow; /* 움직이는 동안 테두리 색상 변경 */
+            border-width: 3px; /* 테두리 두께 변경 */
+        }
+
+        /* 노드 생성 폼 스타일 */
+        .node-form-box {
+            border: 2px solid #007bff; /* 박스 테두리 색상 */
+            border-radius: 5px; /* 모서리 둥글게 */
+            padding: 15px; /* 안쪽 여백 */
+            margin: 10px; /* 박스 간격 */
+            display: inline-block; /* 인라인 블록으로 나란히 배치 */
+            width: 200px; /* 박스 너비 */
+            text-align: center; /* 텍스트 가운데 정렬 */
+            position: absolute; /* 위치 조정 가능하도록 설정 */
+            cursor: move; /* 마우스 커서를 드래그 가능으로 변경 */
+        }
+    </style> -->
+</head>
+<body data-bs-theme="dark">
+<div id="background"></div>
+<div id="ui">
+    <!-- Project ID 입력 폼 -->
+    <div id="form-ID">
+        <h1>Scennect</h1>
+        <form id="projectForm">
+
+            <label for="projectId">Project ID:</label>
+            <input id="projectId" class="form-control" placeholder="Project ID" required>
+
+            <button class="btn btn-secondary" type="submit">Load Project</button>
+        </form>
+    </div>
+</div>
+
+
+<div id="projectDetails"></div>
+
+<!-- 노드 생성 폼 -->
+<div id="nodeForm" class="node-form-box"> <!-- 박스 형태로 변경 -->
+    <h3>Generate New Img</h3>
+    <form id="form">
+        <!-- <label for="prompt">프롬프트:</label>
+        <input type="text" id="prompt" required>
+        <label for="parentNodeId">부모 노드 ID:</label>
+        <textarea type="text" id="parentNodeId" required></textarea>
+        <button type="submit">Create Node</button> -->
+
+        <label for="parentNodeId">Parent Node ID:</label>
+        <input id="parentNodeId" class="form-control" placeholder="Parent Node ID">
+        <label for="prompt">Prompt:</label>
+        <textarea type="text" id="prompt" class="form-control" placeholder="Prompt" required></textarea>
+        <button class="btn generateBtn btn-primary" type="submit">Create Node</button>
+    </form>
+</div>
+
+<div id="nodesContainer" style="display:inherit;">
+    <h2>Nodes:</h2>
+    <div id="nodesList">
+
+        <div id="node-0" class="node-box test" style="top: 400px; left: 440px;">
+            <div class="btn-wrap-close" onclick="deleteNode('node-0')"><button type="button" class="btn-close" aria-label="Close"></button></div>
+            <div class="node-func">
+                <div class="info">
+                    <p>Prompt:</p>
+                    <div class="prompt">Apple on the Table, oil painting</div>
+                </div>
+                <div class="action">
+                    <a href="https://hongik-s3.s3.amazonaws.com/a77ed272-a68f-4bcc-8415-bee295c14086.png" download target="_self" role="button">
+                        <button type="button" class="btn btn-secondary">DownLoad</button>
+                    </a>
+                    <button type="button" class="btn img2img btn-primary">Img2Img</button>
+                </div>
+            </div>
+            <img src="https://hongik-s3.s3.amazonaws.com/a77ed272-a68f-4bcc-8415-bee295c14086.png" alt="test node1" style="height: auto;">
+        </div>
+
+        
+
+
+    </div> <!-- 리스트를 div로 감싸서 박스 형태로 변경 -->
+</div>
+
+<svg class="svg-container">
+    <!-- <line id="line-00" class="animated-dash" x1="400" y1="200" x2="0" y2="0"></line>
+    <line id="line-0" class="animated-dash" x1="0" y1="0" x2="500" y2="500"></line> -->
+  </svg>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+<script>
+    const background = document.getElementById('background');
+    let isDragging = false;
+    let startX, startY, scrollLeft, scrollTop;
+
+    background.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        background.style.cursor = 'grabbing';
+        startX = e.pageX - background.offsetLeft;
+        startY = e.pageY - background.offsetTop;
+        scrollLeft = window.scrollX;
+        scrollTop = window.scrollY;
+    });
+
+    background.addEventListener('mouseleave', () => {
+        isDragging = false;
+        background.style.cursor = 'grab';
+    });
+
+    background.addEventListener('mouseup', () => {
+        isDragging = false;
+        background.style.cursor = 'grab';
+    });
+
+    background.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const x = e.pageX - startX;
+        const y = e.pageY - startY;
+        window.scrollTo(scrollLeft - x, scrollTop - y);
+    });
+</script>
+
+
+
+
+<script>
+    const projectForm = document.getElementById('projectForm');
+    const nodeForm = document.getElementById('nodeForm');
+    const projectDetails = document.getElementById('projectDetails');
+    const nodesContainer = document.getElementById('nodesContainer');
+    const nodesList = document.getElementById('nodesList');
+    let stompClient = null;
+    const userCursors = {}; // 사용자의 커서와 이름을 보여줄 요소를 저장할 객체
+
+    var nodeCheck
+
+
+    // Project ID 입력 폼 처리
+    projectForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const projectId = document.getElementById('projectId').value;
+
+        // /project/{projectId}로 GET 요청
+        fetch(`/project/${projectId}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "access": `${localStorage.getItem('access')}` // Access Token 추가
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Project loaded:", data);
+                projectDetails.innerHTML = `<p>Project ID: ${data.data.id}, Project Name: ${data.data.projectName}</p>`;
+
+                // 사용자 이름 저장
+                currentUserName = data.data.projectUserName; // 사용자 이름 저장
+
+                // 노드 목록 초기화
+                nodesList.innerHTML = ""; // Clear previous nodes
+                // svg 초기화
+                const svgCont = document.getElementsByClassName('svg-container')[0];
+                svgCont.innerHTML = '';
+
+                // 노드 목록을 화면에 표시
+                nodeCheck = data.data;
+                data.data.nodes.forEach(node => {
+                    console.log("node::  ", node, node.children);
+
+                    addNodeToList(node)
+                    .then(() => {
+                        connectButtons(node);  // 작업이 끝난 후 connectButtons 실행
+                        console.log("lineConnectionComplete");
+                    })
+                    .catch(err => {
+                        console.error("Error in addNodeToList: ", err);
+                    });
+
+                });
+
+                // 프로젝트가 성공적으로 로드되면 노드 관련 기능 표시
+                nodeForm.style.display = 'block';
+                nodesContainer.style.display = 'block';
+
+                // WebSocket 연결 시작
+                connectWebSocket(projectId);
+            })
+            .catch(error => {
+                console.error("Error loading project:", error);
+            });
+    });
+
+    
+    function connectButtons(node) {
+        //console.log(node, node.children);
+        var btn1;
+        var btn2;
+        const svgCont = document.getElementsByClassName('svg-container')[0];
+        
+        if(node.children == null){
+            return;
+        }
+
+        for (let i = 0; i < node.children.length; i++) {
+            //console.log("parents abled");
+            btn1 = document.querySelector(`#node-${node.id} .img2img`);
+
+            if(node.children[i] != null){
+                //console.log("child abled");
+                // console.log(node.children[i], node.children[i].id);
+                //console.log(`#node-${node.children[i].id}`, document.querySelector(`#node-${node.children[i].id} .img2img`));
+                const svgNS = "http://www.w3.org/2000/svg";
+                var path = document.createElementNS(svgNS, 'path');
+                
+                path.id = `path-${node.children[i].id}`;
+                path.classList.add('animated-dash');
+
+                btn2 = document.querySelector(`#node-${node.children[i].id} .img2img`);
+
+                const pos1 = btn1.getBoundingClientRect();
+                const pos2 = btn2.getBoundingClientRect();
+
+                // 부모 버튼의 중심 좌표
+                // const x1 = pos1.left + pos1.width / 2;
+                const x1 = (pos1.right - 16);
+                const y1 = (pos1.top + pos1.height / 2);
+
+                // 자식 버튼의 중심 좌표
+                // const x2 = pos2.left + pos2.width / 2;
+                const x2 = (pos2.left + 16);
+                const y2 = (pos2.top + pos2.height / 2);
+
+                // 중간 좌표 - 직각으로 꺾이는 지점 설정
+                const midX = (x1 + x2) / 2;  // x축 중간 지점
+                const midY1 = y1;            // 부모의 y축
+                const midY2 = y2;            // 자식의 y축
+
+                // Path 경로를 설정: M(x1, y1) -> L(midX, midY1) -> L(midX, midY2) -> L(x2, y2)
+                // const pathData = `M${x1},${y1} L${midX},${midY1} Q${midX},${(midY1 + midY2) / 2},${midX},${midY2} L${x2},${y2}`;
+                const pathData = `M${x1},${y1} C${midX},${y1} ${midX},${y2} ${x2},${y2}`;
+
+                // Path에 경로 설정
+                path.setAttribute('d', pathData);
+                path.setAttribute('stroke', 'black');
+                path.setAttribute('stroke-width', '2');
+                path.setAttribute('fill', 'none');
+
+                // SVG에 Path 추가
+                svgCont.appendChild(path);
+
+                connectButtons(node.children[i]);
+            }
+        }
+    }
+
+    function findNodeById(nodes, targetId) {
+        // 각 노드를 순회하며 검사
+        for (const node of nodes) {
+            // 현재 노드의 id가 목표 id와 일치하면 반환
+            if (node.id === targetId) {
+                return node;
+            }
+            // 현재 노드에 children이 있으면 재귀적으로 검사
+            if (node.children && node.children.length > 0) {
+                const foundNode = findNodeById(node.children, targetId);
+                if (foundNode) {
+                    return foundNode; // 찾으면 바로 반환
+                }
+            }
+        }
+        return null; // 찾지 못한 경우 null 반환
+    }
+
+    // 두 버튼 사이에 선을 그리는 함수
+    function drawLine(btn1, btn2, target){
+        const pos1 = btn1.getBoundingClientRect();
+        const pos2 = btn2.getBoundingClientRect();
+
+        // 부모 버튼의 중심 좌표
+        const x1 = (pos1.right - 16);
+        const y1 = (pos1.top + pos1.height / 2);
+
+        // 자식 버튼의 중심 좌표
+        const x2 = (pos2.left + 16);
+        const y2 = (pos2.top + pos2.height / 2);
+
+        // 중간 좌표 - 직각으로 꺾이는 지점 설정
+        const midX = (x1 + x2) / 2;  // x축 중간 지점
+        const midY1 = y1;            // 부모의 y축
+        const midY2 = y2;            // 자식의 y축
+
+        // Path 경로를 설정: M(x1, y1) -> L(midX, midY1) -> L(midX, midY2) -> L(x2, y2)
+        const pathData = `M${x1},${y1} C${midX},${y1} ${midX},${y2} ${x2},${y2}`;
+
+        // Path에 경로 설정
+        path = target;
+        path.setAttribute('d', pathData);
+    }
+
+    // 드래그 시 라인 변화 반영
+    function updateLine(nodeElement){
+
+        // 부모자식 수정시 nodeCheck 업데이트 필요
+        const currentId = parseInt(nodeElement.id.replace("node-", ""));
+
+        //const currentNode = nodeCheck.nodes.find(node => node.id === currentId); // 재귀적으로 검색필요하여 수정
+        const currentNode = findNodeById(nodeCheck.nodes, currentId);
+
+        
+
+        if(currentNode.children != undefined){ // 부모인 경우 == 자식 노드가 있을 경우
+            const childNodeElement = currentNode.children;
+            const btn1 = nodeElement.querySelector(`.img2img`);
+
+            for (let i = 0; i < childNodeElement.length; i++) {
+                let btn2 = document.querySelector(`#node-${childNodeElement[i].id} .img2img`);
+                drawLine(btn1, btn2, document.querySelector(`#path-${childNodeElement[i].id}`));
+            }
+        }
+        if(currentNode.parentNodeId != undefined){ // 자식인 경우 == 부모 노드가 있을 경우
+            // console.log(currentNode, currentNode.parentNodeId, document.querySelector(`#node-${currentNode.parentNodeId}`));
+
+            let btn1 = document.querySelector(`#node-${currentNode.parentNodeId} .img2img`); // 부모
+            let btn2 = nodeElement.querySelector(`.img2img`); // 나
+            drawLine(btn1, btn2, document.querySelector(`#path-${currentNode.id}`));
+
+        }
+    }
+
+    // WebSocket 연결 함수
+    function connectWebSocket(projectId) {
+        const socket = new SockJS('/ws'); // 서버의 WebSocket 엔드포인트
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({
+            "access": `${localStorage.getItem('access')}` // Access Token 추가
+        }, function (frame) {
+            console.log('Connected: ' + frame);
+
+            // WebSocket을 통해 노드 정보 실시간으로 받는 구독 설정
+            stompClient.subscribe(`/topic/project/${projectId}`, function (message) {
+                const newNode = JSON.parse(message.body);
+                addNodeToList(newNode);
+            });
+
+            // WebSocket을 통해 들어온 노드 좌표 데이터를 처리
+            stompClient.subscribe(`/topic/node/${projectId}`, function (message) {
+                const nodeData = JSON.parse(message.body);
+
+                // 전송된 nodeId로 해당 노드 요소를 찾음
+                const nodeElement = document.getElementById(`node-${nodeData.nodeId}`);
+
+                if (nodeElement) {
+                    // 노드의 위치를 새로운 좌표로 업데이트
+                    nodeElement.style.left = `${nodeData.x}px`;
+                    nodeElement.style.top = `${nodeData.y}px`;
+                } else {
+                    console.error(`Node with ID ${nodeData.nodeId} not found.`);
+                }
+            });
+
+            // WebSocket을 통해 마우스 좌표 수신
+            stompClient.subscribe(`/topic/mouse/${projectId}`, function (message) {
+                const mouseData = JSON.parse(message.body);
+                const { name, x, y } = mouseData;
+
+                // 커서 요소가 이미 존재하는지 확인
+                if (!userCursors[name]) {
+                    // 커서 요소 생성
+                    const cursorElement = document.createElement('div');
+                    cursorElement.className = 'cursor';
+                    cursorElement.style.position = 'absolute';
+                    cursorElement.innerHTML = `<span>${name}</span>`;
+                    document.body.appendChild(cursorElement);
+
+                    // 사용자 커서 저장
+                    userCursors[name] = cursorElement;
+                }
+
+                // 커서 위치 업데이트
+                const cursorElement = userCursors[name];
+                cursorElement.style.left = `${x}px`;
+                cursorElement.style.top = `${y}px`;
+            });
+
+            // 노드 삭제 이벤트 구독
+            stompClient.subscribe(`/topic/delete/${projectId}`, function (message) {
+                const nodeId = message.body; // 서버로부터 삭제된 nodeId를 받음
+                deleteNodeElement(nodeId); // 해당 노드를 삭제하는 함수 호출
+            });
+
+        });
+    }
+
+    // 마우스 움직임 감지 및 WebSocket으로 전송
+    document.addEventListener('mousemove', function(event) {
+        if (stompClient && stompClient.connected) {
+            const mouseData = {
+                name: currentUserName, // 사용자 이름 추가
+                x: event.clientX + window.scrollX,
+                y: event.clientY + window.scrollY
+            };
+            stompClient.send(`/app/mouse/${document.getElementById('projectId').value}`, {}, JSON.stringify(mouseData));
+        }
+    });
+
+    //드래그 가능한 기능을 추가하는 함수 - nodeForm에 대해 적용되어있음
+    function makeDraggable(element) {
+        let offsetX, offsetY;
+
+        element.addEventListener('mousedown', function(event) {
+            offsetX = event.clientX - element.getBoundingClientRect().left;
+            offsetY = event.clientY - element.getBoundingClientRect().top;
+
+            document.addEventListener('mousemove', dragElement);
+            document.addEventListener('mouseup', stopDrag);
+        });
+
+        function dragElement(event) {
+            element.style.left = `${event.clientX - offsetX}px`;
+            element.style.top = `${event.clientY - offsetY}px`;
+        }
+
+        function stopDrag() {
+            document.removeEventListener('mousemove', dragElement);
+            document.removeEventListener('mouseup', stopDrag);
+        }
+    }
+
+    // 페이지 로드 시 노드 생성 폼 드래그 가능하게 설정
+    window.onload = function() {
+
+        nodeForm.style.left = '10vw'; // 초기 x 좌표 설정
+        nodeForm.style.top = '30vh'; // 초기 y 좌표 설정
+        makeDraggable(nodeForm); // 드래그 기능 추가
+
+        // const nodeFormElement = document.getElementById('form');
+        // nodeFormElement.addEventListener('submit', function(event) {
+        //     event.preventDefault();
+
+        //     const prompt = document.getElementById('prompt').value;
+        //     const parentNodeId = document.getElementById('parentNodeId').value;
+        //     const x = parseInt(nodeForm.style.left, 10); // 폼의 현재 x 좌표
+        //     const y = parseInt(nodeForm.style.top, 10); // 폼의 현재 y 좌표
+
+        //     fetch('/create-node', {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //         },
+        //         body: JSON.stringify({
+        //             prompt: prompt,
+        //             parentNodeId: parentNodeId,
+        //             x: x,
+        //             y: y
+        //         }),
+        //     })
+        //         .then(response => response.json())
+        //         .then(data => {
+        //             console.log('Node created:', data);
+        //         })
+        //         .catch(error => {
+        //             console.error('Error creating node:', error);
+        //         });
+        // });
+    };
+
+    function makeNodeDraggable(nodeElement, nodeId) {
+        let offsetX, offsetY;
+
+        // 드래그 시작 시 처리
+        nodeElement.addEventListener('mousedown', function(event) {
+            offsetX = event.clientX - nodeElement.getBoundingClientRect().left; // 마우스 X 위치
+            offsetY = event.clientY - nodeElement.getBoundingClientRect().top; // 마우스 Y 위치
+
+            //console.log("dragEvent");
+            // 드래그 중에 노란색 테두리 적용
+            nodeElement.style.border = '2px solid yellow'; // 노란색 테두리로 변경
+
+            // 문서에 마우스 이동 이벤트 리스너 추가
+            document.addEventListener('mousemove', dragNode);
+
+            // 마우스 버튼이 떼어지면 드래그 종료
+            document.addEventListener('mouseup', stopDrag);
+            //updateLine(nodeElement);
+        });
+
+        // 노드 드래그 함수
+        function dragNode(event) {
+            nodeElement.style.left = `${event.clientX - offsetX}px`; // 새로운 X 위치 설정
+            nodeElement.style.top = `${event.clientY - offsetY}px`; // 새로운 Y 위치 설정
+            
+
+            // 노드 이동 정보를 다른 사용자에게 전송하는 로직 추가 가능
+            const nodeData = {
+                nodeId: nodeId,
+                x: parseInt(nodeElement.style.left, 10),
+                y: parseInt(nodeElement.style.top, 10)
+            };
+
+            // WebSocket을 통해 다른 사용자에게 노드의 새로운 위치 전송
+            stompClient.send(`/app/node/${document.getElementById('projectId').value}`, {}, JSON.stringify(nodeData));
+            updateLine(nodeElement);
+            console.log("dragNode");
+        }
+
+        // 드래그 종료 함수
+        function stopDrag() {
+            // 드래그 종료 시 테두리 원래 색으로 되돌리기
+            nodeElement.style.border = '2px solid black'; // 원래의 테두리 색으로 복원
+
+            // 현재 노드 좌표를 서버로 전송하여 데이터베이스에 저장
+            const nodeData = {
+                x: parseInt(nodeElement.style.left, 10),
+                y: parseInt(nodeElement.style.top, 10)
+            };
+
+            // 서버로 PATCH 요청을 보내 좌표 업데이트 (데이터베이스에 반영)
+            fetch(`/node/${nodeId}`, {
+                method: 'PATCH',
+                headers: {
+                    "Content-Type": "application/json",
+                    "access": `${localStorage.getItem('access')}` // Access Token 추가
+                },
+                body: JSON.stringify(nodeData)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to update node coordinates in database');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    //updateLine(nodeElement);
+                    console.log("Node coordinates updated:", data);
+                })
+                .catch(error => {
+                    console.error("Error updating node coordinates:", error);
+                });
+                
+            
+            console.log("stopDrag");
+            // 이벤트 리스너 제거
+            document.removeEventListener('mousemove', dragNode);
+            document.removeEventListener('mouseup', stopDrag);
+
+            updateLine(nodeElement);
+            nodeElement.click();
+        }
+    }
+
+    // 노드 위치 업데이트
+    // function moveNode(moveData) {
+    //     const nodeElement = document.getElementById(`node-${moveData.id}`);
+    //     if (nodeElement) {
+    //         nodeElement.style.left = `${moveData.x}px`;
+    //         nodeElement.style.top = `${moveData.y}px`;
+    //         nodeElement.classList.add('moving'); // 움직일 때 테두리 색상 변경
+
+    //         // 잠시 후 테두리 원래 색으로 복원
+    //         setTimeout(() => {
+    //             nodeElement.classList.remove('moving');
+    //         }, 1000); // 1초 후에 원래 색으로 복원
+    //     }
+    // }
+
+    // 노드 생성 폼 처리
+    nodeForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const prompt = document.getElementById('prompt').value;
+        const parentNodeId = document.getElementById('parentNodeId').value;
+        const projectId = document.getElementById('projectId').value;
+
+        // 현재 마우스 좌표를 가져옴
+        const x = event.clientX; // 마우스의 X 좌표
+        const y = event.clientY; // 마우스의 Y 좌표
+
+        const nodeData = {
+            prompt: prompt,
+            parentNodeId: parentNodeId,
+            projectId: projectId,
+            x: x, // X 좌표 추가
+            y: y  // Y 좌표 추가
+        };
+
+        // 서버로 노드 생성 요청
+        fetch('/node', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "access": `${localStorage.getItem('access')}` // Access Token 추가
+            },
+            body: JSON.stringify(nodeData)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Node created:", data);
+                addNodeToList(data); // 새로 생성된 노드를 화면에 추가
+            })
+            .catch(error => {
+                console.error("Error creating node:", error);
+            });
+    });
+
+    // 노드를 화면에 추가하는 함수
+    function addNodeToList(node) {
+        return new Promise((resolve, reject) => {
+            // 노드 엘리먼트 생성 및 스타일 설정
+            const nodeElement = document.createElement('div');
+            nodeElement.id = `node-${node.id}`; // 각 노드에 고유 ID 추가
+            nodeElement.className = 'node-box'; // CSS 스타일 적용을 위한 클래스
+
+            nodeElement.style.left = `${node.x}px`; // 초기 x 좌표 설정
+            nodeElement.style.top = `${node.y}px`; // 초기 y 좌표 설정
+
+            // 노드 내용 추가
+            nodeElement.innerHTML = `
+            <div class="btn-wrap-close" onclick="deleteNode('node-${node.id}', ${node.id}, document.getElementById('projectId').value)">
+                <button type="button" class="btn-close" aria-label="Close"></button>
+            </div>
+            <div class="node-func">
+                <div class="info"><p>Prompt:</p><div class="prompt">${node.prompt}</div></div>
+                <div class="action">
+                    <a href="" download target="_self" role="button">
+                        <button type="button" class="btn btn-secondary">Download</button>
+                    </a>
+                    <button type="button" class="btn img2img btn-primary">Img2Img</button>
+                </div>
+            </div>`;
+
+            // 이미지 URL이 있으면 이미지 태그 추가
+            if (node.imageURL) {
+                const imageElement = document.createElement('img');
+                const cleanImageURL = node.imageURL.replace(/['"]+/g, ''); // URL에서 따옴표 제거
+                imageElement.src = cleanImageURL; // 수정된 URL 사용
+                imageElement.alt = node.prompt;
+                imageElement.style.width = '100%'; // 이미지 너비 설정
+                imageElement.style.height = 'auto'; // 높이는 자동으로 설정
+                nodeElement.appendChild(imageElement); // 노드 박스에 이미지 추가
+            }
+
+            // 노드 드래그 가능하도록 설정
+            makeNodeDraggable(nodeElement, node.id);
+
+            // 노드를 리스트에 추가
+            nodesList.appendChild(nodeElement);
+
+            // 재귀적으로 자식 노드 처리
+            if (node.children && node.children.length > 0) {
+                // 자식 노드가 있을 경우 모든 자식 노드의 addNodeToList 완료 시 resolve
+                Promise.all(node.children.map(child => addNodeToList(child)))
+                    .then(() => resolve())  // 자식들이 모두 처리되었을 때 resolve 호출
+                    .catch(err => reject(err));  // 에러 발생 시 reject
+            } else {
+                // 자식 노드가 없으면 바로 resolve
+                resolve();
+            }
+        });
+    }
+
+
+    // 노드 삭제됐을때 웹소켓으로 받은 노드 삭제
+    function deleteNodeElement(nodeID) {
+        const nodeElement = document.getElementById(`node-${nodeID}`);
+        const lineElement = document.getElementById(`line-${nodeID}`);
+        if (nodeElement) {
+            nodeElement.remove();
+            lineElement.remove();
+            console.log(`Node with ID ${nodeID} deleted from DOM.`);
+        } else {
+            console.error(`Node with ID ${nodeID} not found.`);
+        }
+    }
+
+    // 노드 지우기 함수
+    function deleteNode(nodeID, nodeIdNumOnly, projectId) {
+        console.log("deleteNode");
+        const lineElement = document.getElementById(`line-${nodeID}`);
+        
+        // DELETE API 호출
+        fetch(`/project/${projectId}/node/${nodeIdNumOnly}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                "access": `${localStorage.getItem('access')}` // Access Token 추가
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    console.log("Node deleted successfully.");
+                    // Node 삭제
+                    document.getElementById(nodeID).remove();
+                    lineElement.remove();
+                } else {
+                    return response.json().then(err => {
+                        console.error("Failed to delete node:", err.message);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error deleting node:", error);
+            });
+    }
+</script>
+</body>
+</html>
