@@ -43,12 +43,11 @@ public enum ErrorStatus implements BaseCode {
 
     // Token Error
     ACCESS_TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "TOKEN4001", "Access 토큰이 없습니다."),
-    INVALID_ACCESS_TOKEN(HttpStatus.BAD_REQUEST, "TOKEN4002", "Access 토큰이 유효하지 않습니다."),
+    ACCESS_TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "TOKEN4002", "Access 토큰이 유효하지 않습니다."),
 
     REFRESH_TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "TOKEN4003", "Refresh 토큰이 없습니다."),
-    INVALID_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, "TOKEN4004", "Refresh 토큰이 유효하지 않습니다."),
-
-    TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "TOKEN4005", "토큰이 만료되었습니다."),
+    REFRESH_TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "TOKEN4004", "Refresh 토큰이 만료됐습니다."),
+    INVALID_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, "TOKEN4005", "Refresh 토큰이 유효하지 않습니다."),
 
     // Redis Error
     REDIS_NOT_FOUND(HttpStatus.BAD_REQUEST, "REDIS4001", "Redis 설정에 오류가 발생했습니다.");
