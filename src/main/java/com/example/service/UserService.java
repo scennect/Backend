@@ -15,4 +15,6 @@ public interface UserService {
     public User loadMemberByPrincipleDetail(PrincipleDetail principalDetail);
 
     public void join(JoinDTO joinDTO);
+
+    public boolean checkDuplicateId(String username);
 }

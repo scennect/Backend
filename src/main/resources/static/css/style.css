@@ -6,7 +6,6 @@
   padding: 0;
 }
 
-
 img {
   -webkit-user-drag: none;
   -khtml-user-drag: none;
@@ -38,6 +37,11 @@ body, html {
   border-radius: 50%; /* 원형으로 만들기 */
   pointer-events: none; /* 클릭 이벤트 차단 */
   z-index: 1000; /* 다른 요소 위에 표시 */
+}
+.cursor span {
+  position: relative;
+  top: 8px;
+  word-break: keep-all;
 }
 
 .node-image {
@@ -261,18 +265,36 @@ input:hover, textarea:hover {
   transition: 0.2s ease-in;
   background-color: rgba(0, 0, 0, 0.6);
 }
-.node-box .info {
-  margin-bottom: 0.75rem;
+.node-box .node-func {
   padding: 0.75rem;
+}
+.node-box .node-func .info {
+  margin-bottom: 0.5rem;
   width: 100%;
 }
-.node-box .info p {
+.node-box .node-func .info p {
   font-size: 0.5rem;
   color: rgba(255, 255, 255, 0.4);
 }
-.node-box .info .prompt {
+.node-box .node-func .info .prompt {
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.85);
+}
+.node-box .node-func .action {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.node-box .node-func .action a {
+  opacity: 0.5;
+}
+.node-box .node-func .action .btn {
+  font-size: 0.75rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.25rem 0.55rem;
+  text-align: center;
 }
 .node-box .node-image {
   user-drag: none;
@@ -283,11 +305,25 @@ input:hover, textarea:hover {
   -ms-user-select: none;
 }
 
-#svgContainer {
+.svg-container {
   position: absolute;
-  width: 100%;
-  height: 100%;
+  z-index: 500;
   top: 0;
   left: 0;
+  width: 200%;
+  height: 200%;
   pointer-events: none;
+}
+
+.animated-dash {
+  stroke-dasharray: 5;
+  stroke: #666;
+  stroke-width: 2;
+  animation: dashAnimation 2s infinite linear;
+}
+
+@keyframes dashAnimation {
+  to {
+    stroke-dashoffset: -10;
+  }
 }/*# sourceMappingURL=style.css.map */

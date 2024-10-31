@@ -64,4 +64,9 @@ public class UserServiceImpl implements UserService{
                 .build();
         userRepository.save(member);
     }
+
+    @Override
+    public boolean checkDuplicateId(String username) {
+        return userRepository.existsByUsername(username);
+    }
 }

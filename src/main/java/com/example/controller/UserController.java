@@ -17,6 +17,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -31,6 +32,13 @@ public class UserController {
     public ApiResponse<String> join(@RequestBody JoinDTO joinDTO) {
         userService.join(joinDTO);
         return ApiResponse.onSuccess(SuccessStatus.OK.getCode(), SuccessStatus.OK.getMessage(), "Join Success");
+    }
+
+    @PostMapping("/check-id")
+    public ApiResponse<Boolean> join(@RequestParam String username) {
+        // 중복 ID면 true, 중복 ID가 아니면 false 반환
+        boolean checkedDuplicateId = userService.checkDuplicateId(username);
+        return ApiResponse.onSuccess(SuccessStatus.OK.getCode(), SuccessStatus.OK.getMessage(), checkedDuplicateId);
     }
 
     @PostMapping("/reissue")

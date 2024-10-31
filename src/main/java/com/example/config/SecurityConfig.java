@@ -1,5 +1,6 @@
 package com.example.config;
 
+import com.example.jwt.CustomLogoutFilter;
 import com.example.jwt.JWTFilter;
 import com.example.jwt.JWTUtil;
 import com.example.jwt.LoginFilter;
@@ -18,6 +19,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -37,7 +39,7 @@ public class SecurityConfig {
     public WebSecurityCustomizer webSecurityCustomizer() {
         return web -> {
             web.ignoring()
-                    .requestMatchers("/join",
+                    .requestMatchers("/join", "/check-id",
                             "/index.html", "/login.html", "/favicon.ico",
                             "/topic/**", "/app/**", "/ws/**",
                             "/api-docs/**", "/swagger-ui/**", "/swagger-ui.html/**", "/v3/api-docs/**", "/swagger-ui/index.html#/**",
@@ -100,11 +102,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/login").permitAll()
 
-                        .requestMatchers("/", "/join", "/reissue",
+                        .requestMatchers("/", "/join", "check-id", "/reissue",
                                 "/index.html", "/login.html", "/favicon.ico",
                                 "/topic/**", "/app/**", "/ws/**").permitAll()
 
-                        .requestMatchers("/node/**", "/mypage", "/project/**").hasRole("USER")
+                        .requestMatchers("/node/**", "/mypage", "/project/**", "/logout").hasRole("USER")
 
                         .requestMatchers( "/swagger-ui/**", "/v3/api-docs/**").permitAll());
 
@@ -118,6 +120,9 @@ public class SecurityConfig {
                 //UsernamePasswordAuthenticationFilter 자리에 LoginFilter를 추가
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, tokenService, redisClient), UsernamePasswordAuthenticationFilter.class);
 
+
+        http
+                .addFilterBefore(new CustomLogoutFilter(jwtUtil, redisClient), LogoutFilter.class);
 
         //세션 설정 : STATELESS
         http
