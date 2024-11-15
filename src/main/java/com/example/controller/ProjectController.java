@@ -119,4 +119,25 @@ public class ProjectController {
         return ApiResponse.onSuccess(SuccessStatus.OK.getCode(), SuccessStatus.OK.getMessage(),"Project updated");
     }
 
+    // 프로젝트 정보 편집
+    @DeleteMapping("/project/{projectId}")
+    public ApiResponse<String> removeProject(@AuthenticationPrincipal PrincipleDetail principleDetail,
+                                           @PathVariable("projectId") Long projectId) {
+
+        if (principleDetail == null) {
+            log.info("Unauthenticated request - User not logged in");
+            return ApiResponse.onFailure(
+                    ErrorStatus.USER_NOT_LOGIN.getCode(),
+                    ErrorStatus.USER_NOT_LOGIN.getMessage(),
+                    "로그인을 해야 됩니다."
+            );
+        }
+
+        User user = userService.loadMemberByPrincipleDetail(principleDetail);
+        projectService.removeProject(projectId, user);
+
+        return ApiResponse.onSuccess(SuccessStatus.OK.getCode(), SuccessStatus.OK.getMessage(),"Project removed");
+    }
+
+
 }

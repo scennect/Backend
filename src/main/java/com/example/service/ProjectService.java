@@ -25,4 +25,6 @@ public interface ProjectService {
     public Project verifyProjectAccess(Long projectId, User user);
 
     public void addNode(Project project, Node node);
+
+    void removeProject(Long projectId, User user);
 }
