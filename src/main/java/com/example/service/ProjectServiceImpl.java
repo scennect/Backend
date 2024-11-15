@@ -133,4 +133,19 @@ public class ProjectServiceImpl implements ProjectService{
         projectRepository.save(project);
     }
 
+    @Override
+    public void removeProject(Long projectId, User user) {
+
+        Project project = findProjectById(projectId);
+
+        // 프로젝트 권한이 없으므로 Error return
+        if (!projectUserService.checkProjectUserExists(project, user)) {
+            throw new GeneralException(ErrorStatus.PROJECT_USER_NOT_FOUND);
+        }
+
+        projectRepository.delete(project);
+    }
+
+
+
 }
