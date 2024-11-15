@@ -1,0 +1,81 @@
+{
+    "alwayson_scripts": {
+        "API payload": {
+            "args": []
+        },
+        "Comments": {
+            "args": []
+        },
+        "Extra options": {
+            "args": []
+        },
+        "Hypertile": {
+            "args": []
+        },
+        "Refiner": {
+            "args": [
+                false,
+                "",
+                0.8
+            ]
+        },
+        "Sampler": {
+            "args": [
+                20,
+                "DPM++ 2M",
+                "Automatic"
+            ]
+        },
+        "Seed": {
+            "args": [
+                -1,
+                false,
+                -1,
+                0,
+                0,
+                0
+            ]
+        }
+    },
+    "batch_size": 1,
+    "cfg_scale": 7,
+    "comments": {},
+    "denoising_strength": 0.7,
+    "disable_extra_networks": false,
+    "do_not_save_grid": false,
+    "do_not_save_samples": false,
+    "enable_hr": false,
+    "height": 512,
+    "hr_negative_prompt": "",
+    "hr_prompt": "",
+    "hr_resize_x": 0,
+    "hr_resize_y": 0,
+    "hr_scale": 2,
+    "hr_second_pass_steps": 0,
+    "hr_upscaler": "Latent",
+    "n_iter": 1,
+    "negative_prompt": "",
+    "override_settings": {},
+    "override_settings_restore_afterwards": true,
+    "prompt": "A photograph of Lionel Messi holding the FIFA World Cup trophy. He is wearing the Argentina national team kit. The image is set in a stadium, with the crowd cheering in the background. The lighting is dramatic, with the focus on Messi and the trophy.",
+    "restore_faces": false,
+    "s_churn": 0,
+    "s_min_uncond": 0,
+    "s_noise": 1,
+    "s_tmax": null,
+    "s_tmin": 0,
+    "sampler_name": "DPM++ 2M",
+    "scheduler": "Automatic",
+    "script_args": [],
+    "script_name": null,
+    "seed": -1,
+    "seed_enable_extras": true,
+    "seed_resize_from_h": -1,
+    "seed_resize_from_w": -1,
+    "steps": 20,
+    "styles": [],
+    "subseed": -1,
+    "subseed_strength": 0,
+    "tiling": false,
+    "width": 512
+}

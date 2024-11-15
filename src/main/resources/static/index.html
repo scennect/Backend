@@ -9,53 +9,8 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <!-- <link rel="stylesheet" type="text/css" href="/css/style.css"> -->
-    <link rel="stylesheet" type="text/css" href="./css/style.css?v=1.1">
-    <!-- <style>
-        .cursor {
-            position: absolute;
-            width: 10px; /* 커서 크기 조정 */
-            height: 10px; /* 커서 크기 조정 */
-            background: red; /* 커서 색상 */
-            border-radius: 50%; /* 원형으로 만들기 */
-            pointer-events: none; /* 클릭 이벤트 차단 */
-            z-index: 1000; /* 다른 요소 위에 표시 */
-        }
-
-        .node-box {
-            border: 2px solid #ccc; /* 박스 테두리 */
-            border-radius: 5px; /* 박스 모서리 둥글게 */
-            padding: 10px; /* 안쪽 여백 */
-            margin: 10px; /* 박스 간격 */
-            display: inline-block; /* 인라인 블록으로 나란히 배치 */
-            width: 150px; /* 박스 너비 */
-            text-align: center; /* 텍스트 가운데 정렬 */
-            position: absolute; /* 위치 조정 가능하도록 설정 */
-            cursor: move; /* 마우스 커서를 드래그 가능으로 변경 */
-        }
-
-        .node-image {
-            max-width: 100%; /* 이미지가 박스를 넘어가지 않도록 조정 */
-            height: auto; /* 비율 유지 */
-        }
-
-        .moving {
-            border-color: yellow; /* 움직이는 동안 테두리 색상 변경 */
-            border-width: 3px; /* 테두리 두께 변경 */
-        }
-
-        /* 노드 생성 폼 스타일 */
-        .node-form-box {
-            border: 2px solid #007bff; /* 박스 테두리 색상 */
-            border-radius: 5px; /* 모서리 둥글게 */
-            padding: 15px; /* 안쪽 여백 */
-            margin: 10px; /* 박스 간격 */
-            display: inline-block; /* 인라인 블록으로 나란히 배치 */
-            width: 200px; /* 박스 너비 */
-            text-align: center; /* 텍스트 가운데 정렬 */
-            position: absolute; /* 위치 조정 가능하도록 설정 */
-            cursor: move; /* 마우스 커서를 드래그 가능으로 변경 */
-        }
-    </style> -->
+    <link rel="stylesheet" type="text/css" href="./css/style.css?v=1.3">
+    
 </head>
 <body data-bs-theme="dark">
 <div id="background"></div>
@@ -63,14 +18,33 @@
     <!-- Project ID 입력 폼 -->
     <div id="form-ID">
         <h1>Scennect</h1>
-        <form id="projectForm">
+        <!-- <form id="projectForm">
 
             <label for="projectId">Project ID:</label>
             <input id="projectId" class="form-control" placeholder="Project ID" required>
 
             <button class="btn btn-secondary" type="submit">Load Project</button>
-        </form>
+        </form> -->
+        <div id="projectList">
+            <!-- <h3>My Projects</h3> -->
+            <button onclick="loadProjectList()" id="openProjectList" class="btn btn-secondary openList" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                Show Project Lists
+            </button>
+            <div class="collapse" id="collapseExample">
+                <div class="card card-body">
+                    <div id="projects">
+                        <!-- <div class="project" data-id="1">Project 1</div>
+                        <div class="project" data-id="2">Project 2</div>
+                        <div class="project" data-id="3">Project 3</div> -->
+                    </div>
+                </div>
+            </div>
+            
+            
+        </div>
     </div>
+
+
 </div>
 
 
@@ -98,7 +72,7 @@
     <h2>Nodes:</h2>
     <div id="nodesList">
 
-        <div id="node-0" class="node-box test" style="top: 400px; left: 440px;">
+        <!-- <div id="node-0" class="node-box test" style="top: 400px; left: 440px;">
             <div class="btn-wrap-close" onclick="deleteNode('node-0')"><button type="button" class="btn-close" aria-label="Close"></button></div>
             <div class="node-func">
                 <div class="info">
@@ -113,7 +87,7 @@
                 </div>
             </div>
             <img src="https://hongik-s3.s3.amazonaws.com/a77ed272-a68f-4bcc-8415-bee295c14086.png" alt="test node1" style="height: auto;">
-        </div>
+        </div> -->
 
         
 
@@ -122,13 +96,232 @@
 </div>
 
 <svg class="svg-container">
-    <!-- <line id="line-00" class="animated-dash" x1="400" y1="200" x2="0" y2="0"></line>
-    <line id="line-0" class="animated-dash" x1="0" y1="0" x2="500" y2="500"></line> -->
-  </svg>
+<!-- <line id="line-00" class="animated-dash" x1="400" y1="200" x2="0" y2="0"></line>
+<line id="line-0" class="animated-dash" x1="0" y1="0" x2="500" y2="500"></line> -->
+</svg>
+
+
+
+<button id="btn-offcanvas-sign" class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#SignOffCanvas" aria-controls="staticBackdrop">
+    Toggle static offcanvas
+</button>
+
+<div id="SignOffCanvas" class="offcanvas offcanvas-start" data-bs-backdrop="static" tabindex="-1" aria-labelledby="staticBackdropLabel">
+    <div class="offcanvas-header">
+        <h1>Scennect</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button" role="tab" aria-controls="home-tab-pane" aria-selected="true">
+                    <h3>Sign-In</h3>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-tab-pane" type="button" role="tab" aria-controls="profile-tab-pane" aria-selected="false">
+                    <h3>Sign-Up</h3>
+                </button>
+            </li>
+          </ul>
+          <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="home-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0">
+                <!-------------->
+                <form id="login-form">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required><br><br>
+
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required><br><br>
+
+                    <button type="submit" class="btn btn-primary">Sign In</button>
+                </form>
+
+                <div id="login-response"></div>
+                <!-------------->
+            </div>
+            <div class="tab-pane fade" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">
+                <!-------------->
+                <form id="signup-form">
+                    <label for="signUp-username">Username:</label>
+                    <input type="signUp-text" id="signUp-username" name="username" required><br><br>
+
+                    <label for="signUp-password">Set Password:</label>
+                    <input type="password" id="signUp-password" name="password" required><br><br>
+
+                    <!-- <label for="password">Check Password:</label>
+                    <input type="password" id="passwordCheck" name="password" required><br><br> -->
+
+                    <label for="signUp-name">Name:</label>
+                    <input type="name" id="signUp-name" name="name" required><br><br>
+
+                    <label for="signUp-eMail">E-mail:</label>
+                    <input type="e-mail" id="signUp-eMail" name="e-mail" required><br><br>
+
+                    
+
+                    <button type="submit" class="btn btn-primary">Sign Up</button>
+                </form>
+
+                <div id="signup-response"></div>
+                <!-------------->
+            </div>
+          </div>
+
+
+    </div>
+</div>
+
+
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
+
+
+
 <script>
+    /// Offcanvas - Sign
+    document.addEventListener('DOMContentLoaded', function() {
+        var btn = document.getElementById('btn-offcanvas-sign');
+        if (btn) {
+            btn.click();
+        } else {
+            console.error("ID가 'btn-offcanvas-sign'인 버튼을 찾을 수 없습니다.");
+        }
+    });
+
+    document.getElementById("login-form").addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+
+        const loginData = {
+            username: username,
+            password: password,
+        };
+
+        fetch("/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(loginData),
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Login failed');
+                }
+
+                // Extract the access token from response headers
+                const accessToken = response.headers.get('access');
+                console.log("Access Token from headers:", accessToken);
+
+                // Store the access token in localStorage
+                if (accessToken) {
+                    localStorage.setItem("access", accessToken);
+                } else {
+                    throw new Error('Access token not found in response headers');
+                }
+
+                return response.json();  // Assuming the server sends a JSON response
+            })
+            .then(data => {
+                console.log("Server Response:", data); // Log the full response for debugging
+
+                // Redirect to index.html
+                // window.location.href = "index.html";
+                document.getElementById('btn-offcanvas-sign').click();
+
+                loadProjectList();
+                document.getElementById('openProjectList').click();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Login failed");
+            });
+    });
+
+
+    document.getElementById("signup-form").addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        // Gather form data
+        const username = document.getElementById("signUp-username").value;
+        const password = document.getElementById("signUp-password").value;
+        const name = document.getElementById("signUp-name").value;
+        const email = document.getElementById("signUp-eMail").value;
+
+        try {
+            // Step 1: Check if the username is available using the /check-id endpoint
+            const checkIdResponse = await fetch(`/check-id?username=${encodeURIComponent(username)}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+
+            const checkIdResult = await checkIdResponse.json();
+
+            if(!checkIdResponse.ok || !checkIdResult.isSuccess){
+                console.error("Username check failed:", checkIdResponse.ok, checkIdResult.isSuccess);
+                return;
+                if (!checkIdResult.data) {
+                    alert("Username is already taken. Please choose another one.");
+                    return;
+                }
+            }
+
+            // Step 2: Proceed with signup if username is available
+            const signUpData = {
+                username: username,
+                password: password,
+                name: name,
+                email: email
+            };
+
+            try {
+                const response = await fetch("/join", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(signUpData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.isSuccess) {
+                    alert("Signup successful!");
+                    console.log(result.message); // Success message
+
+                    // Optional: Trigger any additional action on signup success
+                    // document.getElementById('btn-offcanvas-sign').click();
+                } else {
+                    alert("Signup failed: " + result.message);
+                    console.error("Error code:", result.code);
+                }
+            } catch (error) {
+                console.error("Signup request failed:", error);
+                alert("An error occurred during signup. Please try again.");
+            }
+        } catch (error) {
+            console.error("Username check request failed:", error);
+            alert("An error occurred while checking the username. Please try again.");
+        }
+    });
+    // 가입후에 로그인창으로 이동
+
+
+
+    ///////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
+
+
+
+    /// BackGround Dragging
     const background = document.getElementById('background');
     let isDragging = false;
     let startX, startY, scrollLeft, scrollTop;
@@ -159,12 +352,15 @@
         const y = e.pageY - startY;
         window.scrollTo(scrollLeft - x, scrollTop - y);
     });
-</script>
 
 
 
+    ///////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
 
-<script>
+
     const projectForm = document.getElementById('projectForm');
     const nodeForm = document.getElementById('nodeForm');
     const projectDetails = document.getElementById('projectDetails');
@@ -172,14 +368,92 @@
     const nodesList = document.getElementById('nodesList');
     let stompClient = null;
     const userCursors = {}; // 사용자의 커서와 이름을 보여줄 요소를 저장할 객체
+    let CurrentProjectId = null;
 
     var nodeCheck
 
+    function checkImageUrl(url) {
+        fetch(url)
+            .then(response => {
+                // 이미지일 경우 응답 상태가 200이면서 Content-Type이 "image"로 시작해야 함
+                if (response.ok && response.headers.get("Content-Type").startsWith("image")) {
+                    console.log("이미지가 존재합니다.");
+                    return url.replace(/['"]+/g, '');
+                } else {
+                    console.log("이미지가 없습니다.");
+                    return null;
+                }
+            })
+            .catch(error => {
+                console.log("이미지 로드 실패:", error);
+                return null;
+            });
+    }
 
-    // Project ID 입력 폼 처리
-    projectForm.addEventListener('submit', function(event) {
-        event.preventDefault();
-        const projectId = document.getElementById('projectId').value;
+
+    function loadProjectList(){
+        fetch('/project', {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "access": `${localStorage.getItem('access')}` // Access Token 추가
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Project loaded:", data);
+                const projects = data.data;
+                const projectsDivList = document.getElementById('projects');
+                projectsDivList.innerHTML = '';
+
+                projects.forEach(project => {
+                    // console.log(project, project.projectImageURL, project.projectName);
+
+                    const projectDiv = document.createElement('div');
+
+                    projectDiv.classList.add('project');
+                    projectDiv.dataset.id = project.id;
+
+
+                    projectDiv.innerHTML = `
+                    <div class="info">
+                        <div class="projName">${project.name}</div>    
+                    </div>
+                    <button class="btn btn-secondary">open</button>
+                    `;
+
+
+                    const imageElement = document.createElement('img');
+                    if(project.projectImageURL == null){
+                        imageElement.src = "./img/default-image-url.png"
+                    }else{
+                        const cleanImageURL = project.projectImageURL.replace(/['"]+/g, ''); // URL에서 따옴표 제거
+                        imageElement.src = cleanImageURL; // 수정된 URL 사용
+                    }
+                    projectDiv.getElementsByClassName("info")[0].prepend(imageElement);
+                    
+                    
+
+                    //projectDiv.textContent = project.projectName;
+                    projectDiv.addEventListener('click', function() {
+                        //document.getElementById('projectId').value = project.id;
+                        loadSelectedProject(project.id);
+                    });
+                    projectsDivList.appendChild(projectDiv);
+                });
+            })
+            .catch(error => {
+                console.error("Error loading project:", error);
+            });
+    }
+
+    function loadSelectedProject(projectId){
+        CurrentProjectId = projectId;
 
         // /project/{projectId}로 GET 요청
         fetch(`/project/${projectId}`, {
@@ -210,8 +484,9 @@
 
                 // 노드 목록을 화면에 표시
                 nodeCheck = data.data;
+                console.log(nodeCheck);
                 data.data.nodes.forEach(node => {
-                    console.log("node::  ", node, node.children);
+                    // console.log("node::  ", node, node.children);
 
                     addNodeToList(node)
                     .then(() => {
@@ -234,7 +509,9 @@
             .catch(error => {
                 console.error("Error loading project:", error);
             });
-    });
+    }
+
+   
 
     
     function connectButtons(node) {
@@ -446,7 +723,7 @@
                 x: event.clientX + window.scrollX,
                 y: event.clientY + window.scrollY
             };
-            stompClient.send(`/app/mouse/${document.getElementById('projectId').value}`, {}, JSON.stringify(mouseData));
+            stompClient.send(`/app/mouse/${CurrentProjectId}`, {}, JSON.stringify(mouseData));
         }
     });
 
@@ -475,6 +752,8 @@
 
     // 페이지 로드 시 노드 생성 폼 드래그 가능하게 설정
     window.onload = function() {
+        loadProjectList();
+
 
         nodeForm.style.left = '10vw'; // 초기 x 좌표 설정
         nodeForm.style.top = '30vh'; // 초기 y 좌표 설정
@@ -511,6 +790,7 @@
         // });
     };
 
+
     function makeNodeDraggable(nodeElement, nodeId) {
         let offsetX, offsetY;
 
@@ -536,7 +816,7 @@
             nodeElement.style.left = `${event.clientX - offsetX}px`; // 새로운 X 위치 설정
             nodeElement.style.top = `${event.clientY - offsetY}px`; // 새로운 Y 위치 설정
             
-
+            
             // 노드 이동 정보를 다른 사용자에게 전송하는 로직 추가 가능
             const nodeData = {
                 nodeId: nodeId,
@@ -545,7 +825,7 @@
             };
 
             // WebSocket을 통해 다른 사용자에게 노드의 새로운 위치 전송
-            stompClient.send(`/app/node/${document.getElementById('projectId').value}`, {}, JSON.stringify(nodeData));
+            stompClient.send(`/app/node/${CurrentProjectId}`, {}, JSON.stringify(nodeData));
             updateLine(nodeElement);
             console.log("dragNode");
         }
@@ -610,13 +890,13 @@
     //     }
     // }
 
-    // 노드 생성 폼 처리
+    // txt2img 및 노드 생성 폼 처리
     nodeForm.addEventListener('submit', function(event) {
         event.preventDefault();
 
         const prompt = document.getElementById('prompt').value;
         const parentNodeId = document.getElementById('parentNodeId').value;
-        const projectId = document.getElementById('projectId').value;
+        const projectId = CurrentProjectId;
 
         // 현재 마우스 좌표를 가져옴
         const x = event.clientX; // 마우스의 X 좌표
@@ -667,7 +947,7 @@
 
             // 노드 내용 추가
             nodeElement.innerHTML = `
-            <div class="btn-wrap-close" onclick="deleteNode('node-${node.id}', ${node.id}, document.getElementById('projectId').value)">
+            <div class="btn-wrap-close" onclick="deleteEmptyNode(this)">
                 <button type="button" class="btn-close" aria-label="Close"></button>
             </div>
             <div class="node-func">
@@ -676,7 +956,7 @@
                     <a href="" download target="_self" role="button">
                         <button type="button" class="btn btn-secondary">Download</button>
                     </a>
-                    <button type="button" class="btn img2img btn-primary">Img2Img</button>
+                    <button onclick="Img2ImgAddNode(${node.id})" type="button" class="btn img2img btn-primary">Img2Img</button>
                 </div>
             </div>`;
 
@@ -690,6 +970,7 @@
                 imageElement.style.height = 'auto'; // 높이는 자동으로 설정
                 nodeElement.appendChild(imageElement); // 노드 박스에 이미지 추가
             }
+            
 
             // 노드 드래그 가능하도록 설정
             makeNodeDraggable(nodeElement, node.id);
@@ -708,9 +989,120 @@
                 resolve();
             }
         });
+
+        console.log('Worked???');
     }
 
 
+    function Img2ImgAddNode(parentNodeId){
+        
+        
+        const projectId = CurrentProjectId;
+
+        const parentNode = document.getElementById(`node-${parentNodeId}`);
+        const parentPrompt = parentNode.getElementsByClassName('prompt')[0].innerHTML;
+
+
+        console.log("img2img, parent:", parentNode);
+
+
+        const nodeElement = document.createElement('div');
+        // nodeElement.id = `node-${node.id}`; // 각 노드에 고유 ID 추가
+        nodeElement.className = 'node-box'; // CSS 스타일 적용을 위한 클래스
+        nodeElement.classList.add('before');
+
+        const rect = parentNode.getBoundingClientRect();
+        nodeElement.style.left = `${rect.x + rect.width + 40}px`; // 초기 x 좌표 설정
+        nodeElement.style.top = `${rect.y + (rect.height / 2)}px`; // 초기 y 좌표 설정
+
+        // 노드 내용 추가
+        nodeElement.innerHTML = `
+            <div class="btn-wrap-close" onclick="deleteEmptyNode(this)">
+                <button type="button" class="btn-close" aria-label="Close"></button>
+            </div>
+            <div class="node-func">
+                <form>
+                    <label for="prompt">Prompt:</label>
+                    <textarea type="text" class=" form-control" placeholder="${parentPrompt}" required>${parentPrompt}, </textarea>
+                </form>
+                <div class="action">
+                    <button onclick="GenImg2Img(this, ${parentNodeId})" type="button" class="btn generateBtn btn-primary">Genenrate</button>
+                </div>
+            </div>
+            <div class="loading hide">
+                <div class="spinner-border text-info" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+            `;
+
+        // 노드 드래그 가능하도록 설정
+        //makeNodeDraggable(nodeElement, null);
+
+        // 노드를 리스트에 추가
+        nodesList.appendChild(nodeElement);
+
+    }
+
+    
+
+    function GenImg2Img(target, parentId){
+        console.log("GenImg2Img", target, parentId);
+        
+        const projectId = CurrentProjectId;
+        const parentNodeId = parentId;
+        const currentNode = target.parentElement.parentElement.parentElement;
+        const prompt = currentNode.querySelector('textarea').value;
+        //console.log(currentNode)
+
+
+        target.parentElement.parentElement.classList.add('hide');
+        target.parentElement.parentElement.parentElement.getElementsByClassName('loading')[0].classList.remove('hide');
+
+
+        // 현재 노드 위치
+        const x = parseInt(currentNode.style.left, 10);
+        const y = parseInt(currentNode.style.top, 10);
+
+        const nodeData = {
+            prompt: prompt,
+            x: x, // X 좌표 추가
+            y: y,  // Y 좌표 추가
+            parentNodeId: parentNodeId,
+            projectId: projectId
+        };
+        console.log(currentNode, nodeData)
+
+        // 서버로 노드 생성 요청
+        fetch('/node', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "access": `${localStorage.getItem('access')}` // Access Token 추가
+            },
+            body: JSON.stringify(nodeData)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Node created:", data);
+                // addNodeToList(data); // 새로 생성된 노드를 화면에 추가
+                currentNode.remove();
+            })
+            .catch(error => {
+                console.error("Error creating node:", error);
+            });
+    }
+
+
+    function deleteEmptyNode(target){
+        console.log("deleteEmptyNode");
+        target.parentElement.remove();
+    }
     // 노드 삭제됐을때 웹소켓으로 받은 노드 삭제
     function deleteNodeElement(nodeID) {
         const nodeElement = document.getElementById(`node-${nodeID}`);
@@ -728,6 +1120,9 @@
     function deleteNode(nodeID, nodeIdNumOnly, projectId) {
         console.log("deleteNode");
         const lineElement = document.getElementById(`line-${nodeID}`);
+
+        document.getElementById(nodeID).remove();
+        lineElement.remove();
         
         // DELETE API 호출
         fetch(`/project/${projectId}/node/${nodeIdNumOnly}`, {
@@ -741,8 +1136,8 @@
                 if (response.ok) {
                     console.log("Node deleted successfully.");
                     // Node 삭제
-                    document.getElementById(nodeID).remove();
-                    lineElement.remove();
+                    // document.getElementById(nodeID).remove();
+                    // lineElement.remove();
                 } else {
                     return response.json().then(err => {
                         console.error("Failed to delete node:", err.message);
