@@ -9,7 +9,7 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <!-- <link rel="stylesheet" type="text/css" href="/css/style.css"> -->
-    <link rel="stylesheet" type="text/css" href="./css/style.css?v=1.3">
+    <link rel="stylesheet" type="text/css" href="./css/style.css?v=1.8">
     
 </head>
 <body data-bs-theme="dark">
@@ -17,7 +17,14 @@
 <div id="ui">
     <!-- Project ID 입력 폼 -->
     <div id="form-ID">
-        <h1>Scennect</h1>
+        <div class="head">
+            <h1>Scennect</h1>
+            
+            <svg id="mainChevron" onclick="toggleMainMenu()" xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor" class="bi bi-chevron-up" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708z"></path>
+              </svg>
+        </div>
+        
         <!-- <form id="projectForm">
 
             <label for="projectId">Project ID:</label>
@@ -27,19 +34,50 @@
         </form> -->
         <div id="projectList">
             <!-- <h3>My Projects</h3> -->
-            <button onclick="loadProjectList()" id="openProjectList" class="btn btn-secondary openList" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-                Show Project Lists
-            </button>
-            <div class="collapse" id="collapseExample">
-                <div class="card card-body">
+
+            <nav>
+                <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                  <button class="nav-link active" id="nav-showList-tab" data-bs-toggle="tab" data-bs-target="#nav-showList" type="button" role="tab" aria-controls="nav-showList" aria-selected="true">Show Project Lists</button>
+                  <button class="nav-link" id="nav-newProj-tab" data-bs-toggle="tab" data-bs-target="#nav-newProj" type="button" role="tab" aria-controls="nav-newProj" aria-selected="false">Add a New Project</button>
+                </div>
+              </nav>
+              <div class="tab-content" id="nav-tabContent">
+                <div class="tab-pane fade show active" id="nav-showList" role="tabpanel" aria-labelledby="nav-showList-tab" tabindex="0">
+                    <div class="state" onclick="loadProjectList()">
+                        <p>Need to Sign In</p>
+                        <button class="btn btn-primary">Sign In</button>
+                    </div>
+                    <div class="state" onclick="clickNewProject()" style="display: none;">
+                        <p>There are no projects</p>
+                        <button class="btn btn-primary">Add New Project</button>
+                    </div>
                     <div id="projects">
                         <!-- <div class="project" data-id="1">Project 1</div>
                         <div class="project" data-id="2">Project 2</div>
                         <div class="project" data-id="3">Project 3</div> -->
+                        
                     </div>
+                    
                 </div>
-            </div>
-            
+                <div class="tab-pane fade" id="nav-newProj" role="tabpanel" aria-labelledby="nav-newProj-tab" tabindex="0">
+                    
+                    <form>
+                        <div class="mb-3">
+                          <label for="newProjectName" class="form-label">Project Name</label>
+                          <input type="text" class="form-control" id="newProjectName" placeholder="Drawing Apple">
+                        </div>
+                        <div class="mb-3">
+                          <label for="memberEmails" class="form-label">invite the Members</label>
+                          <input type="email" class="form-control" id="memberEmails" placeholder="e-mail address">
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="isPublic">
+                            <label class="form-check-label" for="isPublic">Check if you want to make project PUBLIC</label>
+                        </div>
+                        <button onclick="addNewProject()" type="button" class="btn btn-primary funcBtn">Add New Project</button>
+                      </form>
+                </div>
+              </div>
             
         </div>
     </div>
@@ -52,7 +90,17 @@
 
 <!-- 노드 생성 폼 -->
 <div id="nodeForm" class="node-form-box"> <!-- 박스 형태로 변경 -->
-    <h3>Generate New Img</h3>
+    <div id="loadingIndicator">
+        <div class="spinner-border text-info" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+    <div class="head">
+        <h3>Generate Img</h3>
+        <svg id="GenChevron" onclick="toggleGenMenu()" xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-chevron-up" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708z"></path>
+        </svg>
+    </div>
     <form id="form">
         <!-- <label for="prompt">프롬프트:</label>
         <input type="text" id="prompt" required>
@@ -60,8 +108,8 @@
         <textarea type="text" id="parentNodeId" required></textarea>
         <button type="submit">Create Node</button> -->
 
-        <label for="parentNodeId">Parent Node ID:</label>
-        <input id="parentNodeId" class="form-control" placeholder="Parent Node ID">
+        <!-- <label for="parentNodeId">Parent Node ID:</label>
+        <input id="parentNodeId" class="form-control" placeholder="Parent Node ID"> -->
         <label for="prompt">Prompt:</label>
         <textarea type="text" id="prompt" class="form-control" placeholder="Prompt" required></textarea>
         <button class="btn generateBtn btn-primary" type="submit">Create Node</button>
@@ -103,7 +151,7 @@
 
 
 <button id="btn-offcanvas-sign" class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#SignOffCanvas" aria-controls="staticBackdrop">
-    Toggle static offcanvas
+    AUTH
 </button>
 
 <div id="SignOffCanvas" class="offcanvas offcanvas-start" data-bs-backdrop="static" tabindex="-1" aria-labelledby="staticBackdropLabel">
@@ -111,7 +159,7 @@
         <h1>Scennect</h1>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
-    <div class="offcanvas-body">
+    <div id="Signed" class="offcanvas-body">
         <ul class="nav nav-tabs" id="myTab" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button" role="tab" aria-controls="home-tab-pane" aria-selected="true">
@@ -170,7 +218,36 @@
 
 
     </div>
+    <div id="LogOut">
+        <button onclick="logOut()" class="btn btn-danger" type="button">Sign Out</button>
+    </div>
 </div>
+
+<!-- Modal -->
+<div class="modal fade" id="ImgExpandModal" tabindex="-1" aria-labelledby="ImgExpandModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="btn-wrap-close">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <img id="expandModalImg" src="" alt="test node1" style="height: auto;">
+            
+
+        </div>
+        <div class="modal-footer">
+            <div class="info">
+                <p>ID: <span id="expandModalID">Id of node</span></p>
+                <div id="expandModalPrompt">Prompt of node</div>
+            </div>
+            <div class="btnGroup">
+                <button type="button" class="btn btn-primary">Download Img</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
 
 
@@ -180,15 +257,146 @@
 
 
 <script>
-    /// Offcanvas - Sign
-    document.addEventListener('DOMContentLoaded', function() {
-        var btn = document.getElementById('btn-offcanvas-sign');
-        if (btn) {
-            btn.click();
-        } else {
-            console.error("ID가 'btn-offcanvas-sign'인 버튼을 찾을 수 없습니다.");
+
+    // 페이지 로드 시 노드 생성 폼 드래그 가능하게 설정
+    window.onload = function() {    
+        projectListStateControl();
+        
+
+        nodeForm.style.left = '10vw'; // 초기 x 좌표 설정
+        nodeForm.style.top = '30vh'; // 초기 y 좌표 설정
+        makeDraggable(nodeForm); // 드래그 기능 추가
+
+        // const nodeFormElement = document.getElementById('form');
+        // nodeFormElement.addEventListener('submit', function(event) {
+        //     event.preventDefault();
+
+        //     const prompt = document.getElementById('prompt').value;
+        //     const parentNodeId = document.getElementById('parentNodeId').value;
+        //     const x = parseInt(nodeForm.style.left, 10); // 폼의 현재 x 좌표
+        //     const y = parseInt(nodeForm.style.top, 10); // 폼의 현재 y 좌표
+
+        //     fetch('/create-node', {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //         },
+        //         body: JSON.stringify({
+        //             prompt: prompt,
+        //             parentNodeId: parentNodeId,
+        //             x: x,
+        //             y: y
+        //         }),
+        //     })
+        //         .then(response => response.json())
+        //         .then(data => {
+        //             console.log('Node created:', data);
+        //         })
+        //         .catch(error => {
+        //             console.error('Error creating node:', error);
+        //         });
+        // });
+    };
+
+
+    function toggleMainMenu(){
+        document.getElementById('mainChevron').classList.toggle('hide');
+        document.getElementById('nav-showList-tab').click();
+        document.getElementById('projectList').classList.toggle('deActive');
+    }
+    
+    function toggleGenMenu(){
+        document.getElementById('GenChevron').classList.toggle('hide');
+        document.getElementById('form').classList.toggle('deActive');
+    }
+
+    function addNewProject() {
+        const name = document.getElementById('newProjectName').value;
+        let emails = document.getElementById('memberEmails').value.split(',').map(email => email.trim());
+        const isPublic = document.getElementById('isPublic').checked;
+
+        // 입력값 유효성 검사
+        if (!name) {
+            alert("Project name is required.");
+            return;
         }
-    });
+        if (emails.length === 0 || emails[0] === "") {
+            // alert("At least one email is required.");
+            emails = null;
+        }
+
+        const newProjectData = {
+            name: name,
+            isPublic: isPublic,
+            memberEmails: emails
+        };
+        console.log(newProjectData);
+
+        fetch(`/project`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                // 인증이 필요하면 아래 라인을 복구하세요
+                "access": `${localStorage.getItem('access')}` // Access Token 추가
+            },
+            body: JSON.stringify(newProjectData)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.isSuccess) {
+                    console.log("Project created:", data.message);
+                    loadProjectList();
+                    document.getElementById('nav-showList-tab').click(); // UI 업데이트 코드
+                } else {
+                    throw new Error(data.message || 'Project creation failed');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert(`Project creation failed: ${error.message}`);
+            });
+    }
+
+
+
+
+    function clickNewProject(){
+        document.getElementById('nav-newProj-tab').click();
+    }
+
+    function logOut(){
+        localStorage.removeItem('access');
+        location.reload();
+        // document.getElementById('LogOut').style.display = "none";
+        // document.getElementById('Signed').style.display = "block";
+    }
+
+    
+    function projectListStateControl(){
+        if(localStorage.getItem('access')){
+            loadProjectList();
+            //
+            document.getElementsByClassName('state')[0].style.display = "none";
+            //
+            document.getElementById('LogOut').style.display = "flex";
+            document.getElementById('Signed').style.display = "none"; 
+        }else{
+            document.getElementsByClassName('state')[0].style.display = "flex";
+            //
+            document.getElementById('LogOut').style.display = "none"; 
+            document.getElementById('Signed').style.display = "block";
+            ///////
+            /////// 디버깅 ///////
+            ///////
+            // document.getElementById('btn-offcanvas-sign').click();
+            ///////
+            /////// 디버깅 ///////
+            ///////
+        }
+        
+    }
+
+
 
     document.getElementById("login-form").addEventListener("submit", function (event) {
         event.preventDefault();
@@ -232,9 +440,8 @@
                 // Redirect to index.html
                 // window.location.href = "index.html";
                 document.getElementById('btn-offcanvas-sign').click();
-
-                loadProjectList();
-                document.getElementById('openProjectList').click();
+                projectListStateControl();
+                
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -322,36 +529,36 @@
 
 
     /// BackGround Dragging
-    const background = document.getElementById('background');
-    let isDragging = false;
-    let startX, startY, scrollLeft, scrollTop;
+    // const background = document.getElementById('background');
+    // let isDragging = false;
+    // let startX, startY, scrollLeft, scrollTop;
 
-    background.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        background.style.cursor = 'grabbing';
-        startX = e.pageX - background.offsetLeft;
-        startY = e.pageY - background.offsetTop;
-        scrollLeft = window.scrollX;
-        scrollTop = window.scrollY;
-    });
+    // background.addEventListener('mousedown', (e) => {
+    //     isDragging = true;
+    //     background.style.cursor = 'grabbing';
+    //     startX = e.pageX - background.offsetLeft;
+    //     startY = e.pageY - background.offsetTop;
+    //     scrollLeft = window.scrollX;
+    //     scrollTop = window.scrollY;
+    // });
 
-    background.addEventListener('mouseleave', () => {
-        isDragging = false;
-        background.style.cursor = 'grab';
-    });
+    // background.addEventListener('mouseleave', () => {
+    //     isDragging = false;
+    //     background.style.cursor = 'grab';
+    // });
 
-    background.addEventListener('mouseup', () => {
-        isDragging = false;
-        background.style.cursor = 'grab';
-    });
+    // background.addEventListener('mouseup', () => {
+    //     isDragging = false;
+    //     background.style.cursor = 'grab';
+    // });
 
-    background.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        e.preventDefault();
-        const x = e.pageX - startX;
-        const y = e.pageY - startY;
-        window.scrollTo(scrollLeft - x, scrollTop - y);
-    });
+    // background.addEventListener('mousemove', (e) => {
+    //     if (!isDragging) return;
+    //     e.preventDefault();
+    //     const x = e.pageX - startX;
+    //     const y = e.pageY - startY;
+    //     window.scrollTo(scrollLeft - x, scrollTop - y);
+    // });
 
 
 
@@ -392,6 +599,14 @@
 
 
     function loadProjectList(){
+
+        if (localStorage.getItem('access') == null || localStorage.getItem('access') == 'undefined') {
+            console.error("Access Token not found");
+            document.getElementById('btn-offcanvas-sign').click();
+            return;
+        }
+        
+
         fetch('/project', {
             method: "GET",
             headers: {
@@ -411,20 +626,37 @@
                 const projectsDivList = document.getElementById('projects');
                 projectsDivList.innerHTML = '';
 
+
+                // 프로젝트가 없을 경우 // There are no projects.
+                if (projects.length === 0) {
+                    document.getElementsByClassName('state')[1].style.display = "flex";
+                }else{
+                    document.getElementsByClassName('state')[1].style.display = "none";
+                }
+
                 projects.forEach(project => {
                     // console.log(project, project.projectImageURL, project.projectName);
 
                     const projectDiv = document.createElement('div');
 
                     projectDiv.classList.add('project');
+                    // projectDiv.addEventListener('click', function() {
+                    //     activateProjectLi(project.id);
+                    // });
                     projectDiv.dataset.id = project.id;
 
 
                     projectDiv.innerHTML = `
-                    <div class="info">
-                        <div class="projName">${project.name}</div>    
+                    <div class="info">    
                     </div>
-                    <button class="btn btn-secondary">open</button>
+                    <div class="action">
+                        <div class="projName">${project.name}</div>
+                        <div class="btns">
+                            <button onclick="loadSelectedProject(${project.id})" class="btn btn-secondary btnOpen">open</button>
+                            <button onclick="deleteSelectedProject(${project.id})" class="btn btn-secondary btnDelete">delete</button>
+                        </div>
+                    </div>
+                    
                     `;
 
 
@@ -438,12 +670,12 @@
                     projectDiv.getElementsByClassName("info")[0].prepend(imageElement);
                     
                     
-
-                    //projectDiv.textContent = project.projectName;
-                    projectDiv.addEventListener('click', function() {
-                        //document.getElementById('projectId').value = project.id;
-                        loadSelectedProject(project.id);
-                    });
+                    // onclick으로 처리
+                    // //projectDiv.textContent = project.projectName;
+                    // projectDiv.addEventListener('click', function() {
+                    //     //document.getElementById('projectId').value = project.id;
+                    //     loadSelectedProject(project.id);
+                    // });
                     projectsDivList.appendChild(projectDiv);
                 });
             })
@@ -452,8 +684,74 @@
             });
     }
 
-    function loadSelectedProject(projectId){
+    function activateProjectLi(projId){
+        const projectDivs = document.getElementById("projects").getElementsByClassName('project');
+        for (const projectDiv of projectDivs) {
+            projectDiv.classList.remove('active');
+            projectDiv.style.opacity = 0.8;
+        }
+        const selectedProjectDiv = document.querySelector(`.project[data-id="${projId}"]`);
+        selectedProjectDiv.classList.add('active');
+        selectedProjectDiv.style.opacity = 1;
+    }
+
+    function deleteSelectedProject(projectId){
         CurrentProjectId = projectId;
+
+        fetch(`/project/${projectId}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "access": `${localStorage.getItem('access')}` // Access Token 추가
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Project deleted:", data);
+                loadProjectList();
+            })
+            .catch(error => {
+                console.error("Error deleting project:", error);
+            });
+    }
+
+    function upadteNodeCheck(){
+        fetch(`/project/${CurrentProjectId}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "access": `${localStorage.getItem('access')}` // Access Token 추가
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Project loaded:", data);
+                const svgCont = document.getElementsByClassName('svg-container')[0].innerHTML = '';
+
+                nodeCheck = data.data;
+                data.data.nodes.forEach(node => {
+                    connectButtons(node);
+                });
+            })
+            .catch(error => {
+                console.error("Error loading project:", error);
+            });
+    }
+
+    
+
+    function loadSelectedProject(projectId){
+        // CurrentProjectId = projectId;
 
         // /project/{projectId}로 GET 요청
         fetch(`/project/${projectId}`, {
@@ -470,6 +768,11 @@
                 return response.json();
             })
             .then(data => {
+
+                CurrentProjectId = data.data.id;
+                activateProjectLi(data.data.id);
+
+
                 console.log("Project loaded:", data);
                 projectDetails.innerHTML = `<p>Project ID: ${data.data.id}, Project Name: ${data.data.projectName}</p>`;
 
@@ -594,7 +897,7 @@
         return null; // 찾지 못한 경우 null 반환
     }
 
-    // 두 버튼 사이에 선을 그리는 함수
+    // 두 버튼 사이에 선을 그리는(업데이트) 함수
     function drawLine(btn1, btn2, target){
         const pos1 = btn1.getBoundingClientRect();
         const pos2 = btn2.getBoundingClientRect();
@@ -616,7 +919,25 @@
         const pathData = `M${x1},${y1} C${midX},${y1} ${midX},${y2} ${x2},${y2}`;
 
         // Path에 경로 설정
-        path = target;
+        if(target == null){
+            var path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+            //path.id = `path-${node.children[i].id}`;
+            path.classList.add('animated-dash');
+            path.classList.add('tempPath');
+            path.classList.add('childPathOf-' + btn1.parentElement.parentElement.parentElement.id.replace("node-", ""));
+
+            path.setAttribute('d', pathData);
+            path.setAttribute('stroke', 'black');
+            path.setAttribute('stroke-width', '2');
+            path.setAttribute('fill', 'none');
+
+            // SVG에 Path 추가
+            const svgCont = document.getElementsByClassName('svg-container')[0];
+            svgCont.appendChild(path);
+
+        }else{
+            var path = target;
+        }
         path.setAttribute('d', pathData);
     }
 
@@ -626,12 +947,15 @@
         // 부모자식 수정시 nodeCheck 업데이트 필요
         const currentId = parseInt(nodeElement.id.replace("node-", ""));
 
-        //const currentNode = nodeCheck.nodes.find(node => node.id === currentId); // 재귀적으로 검색필요하여 수정
         const currentNode = findNodeById(nodeCheck.nodes, currentId);
 
+        const childPathes = document.getElementsByClassName('childPathOf-' + currentId);
+        
+        
         
 
-        if(currentNode.children != undefined){ // 부모인 경우 == 자식 노드가 있을 경우
+        if(currentNode?.children != undefined){ // 부모인 경우 == 자식 노드가 있을 경우
+            // console.log("case1");
             const childNodeElement = currentNode.children;
             const btn1 = nodeElement.querySelector(`.img2img`);
 
@@ -640,13 +964,29 @@
                 drawLine(btn1, btn2, document.querySelector(`#path-${childNodeElement[i].id}`));
             }
         }
-        if(currentNode.parentNodeId != undefined){ // 자식인 경우 == 부모 노드가 있을 경우
+        if(currentNode?.parentNodeId != undefined){ // 자식인 경우 == 부모 노드가 있을 경우
+            // console.log("case2");
             // console.log(currentNode, currentNode.parentNodeId, document.querySelector(`#node-${currentNode.parentNodeId}`));
 
             let btn1 = document.querySelector(`#node-${currentNode.parentNodeId} .img2img`); // 부모
             let btn2 = nodeElement.querySelector(`.img2img`); // 나
             drawLine(btn1, btn2, document.querySelector(`#path-${currentNode.id}`));
+        }
+        if(childPathes?.length != 0){ // 부모자식둘다 여부 상관없이 img2img는 존재 가능하므로
+            // console.log("case3");
+            const ImgNodeChildOf = document.getElementsByClassName('ImgNode-ChildOf-' + currentId);
+            for (let i = 0; i < childPathes.length; i++) {
+                drawLine(document.querySelector(`#node-${currentId} .img2img`), ImgNodeChildOf[i].getElementsByClassName("generateBtn")[0], childPathes[i]);
+            } 
+        }
+        if(nodeElement.classList.contains("before")){ // 이미지 생성중 노드인 경우
+            // console.log("case4"); // 두개이상 처리 필요
+            const matchingClasses = Array.from(nodeElement.classList).filter(cls => cls.startsWith('ImgNode-ChildOf-'))[0].replace("ImgNode-ChildOf-", "");
 
+            // console.log("case4", matchingClasses, matchingClasses.replace("ImgNode-ChildOf-", ""), document.querySelector(`#node-${matchingClasses} .img2img`), );
+            
+            drawLine(document.querySelector(`#node-${matchingClasses} .img2img`), nodeElement.querySelector(`.generateBtn`), document.querySelector(`.childPathOf-${matchingClasses}`));
+            
         }
     }
 
@@ -662,8 +1002,12 @@
 
             // WebSocket을 통해 노드 정보 실시간으로 받는 구독 설정
             stompClient.subscribe(`/topic/project/${projectId}`, function (message) {
+                
+                console.log("ws : addNodeToList");
+                
                 const newNode = JSON.parse(message.body);
                 addNodeToList(newNode);
+                upadteNodeCheck();
             });
 
             // WebSocket을 통해 들어온 노드 좌표 데이터를 처리
@@ -708,8 +1052,19 @@
 
             // 노드 삭제 이벤트 구독
             stompClient.subscribe(`/topic/delete/${projectId}`, function (message) {
-                const nodeId = message.body; // 서버로부터 삭제된 nodeId를 받음
-                deleteNodeElement(nodeId); // 해당 노드를 삭제하는 함수 호출
+                const nodeID = message.body; // 서버로부터 삭제된 nodeID를 받음
+                console.log("ws : delete node:", nodeID);
+
+                // 로컬에서 이미 삭제한 노드라면 생략
+                if (locallyDeletedNodes.has(nodeID)) {
+                    console.log("Skipping deleteNode: already deleted locally");
+                    locallyDeletedNodes.delete(nodeID); // 로컬 기록에서 제거
+                    return;
+                }
+
+                if(document.getElementById(`node-${nodeID}`)){
+                    deleteNode(nodeID); // 해당 노드를 삭제하는 함수 호출
+                }
             });
 
         });
@@ -742,6 +1097,10 @@
         function dragElement(event) {
             element.style.left = `${event.clientX - offsetX}px`;
             element.style.top = `${event.clientY - offsetY}px`;
+
+            if(element.classList.contains("node-box")){
+                updateLine(element);
+            }
         }
 
         function stopDrag() {
@@ -750,45 +1109,7 @@
         }
     }
 
-    // 페이지 로드 시 노드 생성 폼 드래그 가능하게 설정
-    window.onload = function() {
-        loadProjectList();
-
-
-        nodeForm.style.left = '10vw'; // 초기 x 좌표 설정
-        nodeForm.style.top = '30vh'; // 초기 y 좌표 설정
-        makeDraggable(nodeForm); // 드래그 기능 추가
-
-        // const nodeFormElement = document.getElementById('form');
-        // nodeFormElement.addEventListener('submit', function(event) {
-        //     event.preventDefault();
-
-        //     const prompt = document.getElementById('prompt').value;
-        //     const parentNodeId = document.getElementById('parentNodeId').value;
-        //     const x = parseInt(nodeForm.style.left, 10); // 폼의 현재 x 좌표
-        //     const y = parseInt(nodeForm.style.top, 10); // 폼의 현재 y 좌표
-
-        //     fetch('/create-node', {
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/json',
-        //         },
-        //         body: JSON.stringify({
-        //             prompt: prompt,
-        //             parentNodeId: parentNodeId,
-        //             x: x,
-        //             y: y
-        //         }),
-        //     })
-        //         .then(response => response.json())
-        //         .then(data => {
-        //             console.log('Node created:', data);
-        //         })
-        //         .catch(error => {
-        //             console.error('Error creating node:', error);
-        //         });
-        // });
-    };
+    
 
 
     function makeNodeDraggable(nodeElement, nodeId) {
@@ -805,14 +1126,16 @@
 
             // 문서에 마우스 이동 이벤트 리스너 추가
             document.addEventListener('mousemove', dragNode);
+            
 
             // 마우스 버튼이 떼어지면 드래그 종료
             document.addEventListener('mouseup', stopDrag);
-            //updateLine(nodeElement);
+            updateLine(nodeElement);
         });
 
         // 노드 드래그 함수
         function dragNode(event) {
+            updateLine(nodeElement);
             nodeElement.style.left = `${event.clientX - offsetX}px`; // 새로운 X 위치 설정
             nodeElement.style.top = `${event.clientY - offsetY}px`; // 새로운 Y 위치 설정
             
@@ -826,7 +1149,6 @@
 
             // WebSocket을 통해 다른 사용자에게 노드의 새로운 위치 전송
             stompClient.send(`/app/node/${CurrentProjectId}`, {}, JSON.stringify(nodeData));
-            updateLine(nodeElement);
             console.log("dragNode");
         }
 
@@ -870,8 +1192,8 @@
             document.removeEventListener('mousemove', dragNode);
             document.removeEventListener('mouseup', stopDrag);
 
-            updateLine(nodeElement);
-            nodeElement.click();
+            //updateLine(nodeElement);
+            // nodeElement.click();
         }
     }
 
@@ -890,12 +1212,14 @@
     //     }
     // }
 
+    ////////////////////////////////////////////////////////////////////////
     // txt2img 및 노드 생성 폼 처리
-    nodeForm.addEventListener('submit', function(event) {
+    ////////////////////////////////////////////////////////////////////////
+    nodeForm.addEventListener('submit', async function(event) {
         event.preventDefault();
 
         const prompt = document.getElementById('prompt').value;
-        const parentNodeId = document.getElementById('parentNodeId').value;
+        // const parentNodeId = document.getElementById('parentNodeId').value;
         const projectId = CurrentProjectId;
 
         // 현재 마우스 좌표를 가져옴
@@ -904,35 +1228,90 @@
 
         const nodeData = {
             prompt: prompt,
-            parentNodeId: parentNodeId,
+            parentNodeId: null,
             projectId: projectId,
             x: x, // X 좌표 추가
             y: y  // Y 좌표 추가
         };
 
-        // 서버로 노드 생성 요청
-        fetch('/node', {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "access": `${localStorage.getItem('access')}` // Access Token 추가
-            },
-            body: JSON.stringify(nodeData)
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok ' + response.statusText);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log("Node created:", data);
-                addNodeToList(data); // 새로 생성된 노드를 화면에 추가
-            })
-            .catch(error => {
-                console.error("Error creating node:", error);
+        try {
+            // 요청 중 표시
+            console.log("Sending request to create node...");
+            showLoadingIndicator(); // 로딩 표시 함수 호출 (UI에서 스피너 활성화)
+
+            // 서버로 노드 생성 요청
+            const response = await fetch('/node', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "access": `${localStorage.getItem('access')}` // Access Token 추가
+                },
+                body: JSON.stringify(nodeData)
             });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+
+            const data = await response.json();
+
+            // 요청 성공 후 처리
+            console.log("Node created:", data);
+            addNodeToList(data); // 새로 생성된 노드를 화면에 추가
+            hideLoadingIndicator(); // 로딩 표시 숨김
+            prompt.value = ''; // 입력 필드 초기화
+
+            onSuccess(); // 성공 후 추가 작업 (예: 알림 표시)
+        } catch (error) {
+            // 에러 처리
+            console.error("Error creating node:", error);
+            hideLoadingIndicator(); // 로딩 표시 숨김
+            onError(error); // 에러 발생 시 추가 작업 (예: 알림 표시)
+        }
     });
+    ////////////////////////////////////////////
+        function showLoadingIndicator() {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            if (loadingIndicator) {
+                loadingIndicator.style.display = 'flex';
+            }
+        }
+        function hideLoadingIndicator() {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            if (loadingIndicator) {
+                loadingIndicator.style.display = 'none';
+            }
+        }
+        function onSuccess() {
+            console.log("Node creation succeeded!");
+            // 성공 메시지 또는 알림 표시
+        }
+        function onError(error) {
+            console.error("Error occurred:", error);
+            alert("Failed to create node. Please try again.");
+        }
+    ////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+    function insertContentsOnModal(nodeID, nodeImgURL, nodePrompt){
+        const decodedURL = decodeURIComponent(nodeImgURL);
+        console.log(nodeImgURL, decodedURL);
+
+        // const modal = document.getElementById('ImgExpandModal');
+        const modalImg = document.getElementById('expandModalImg');
+        const modalID = document.getElementById('expandModalID');
+        const modalPrompt = document.getElementById('expandModalPrompt');
+
+        modalImg.src = decodedURL;
+        modalID.innerHTML = nodeID;
+        modalPrompt.innerHTML = nodePrompt;
+
+    }
 
     // 노드를 화면에 추가하는 함수
     function addNodeToList(node) {
@@ -942,14 +1321,27 @@
             nodeElement.id = `node-${node.id}`; // 각 노드에 고유 ID 추가
             nodeElement.className = 'node-box'; // CSS 스타일 적용을 위한 클래스
 
-            nodeElement.style.left = `${node.x}px`; // 초기 x 좌표 설정
-            nodeElement.style.top = `${node.y}px`; // 초기 y 좌표 설정
+
+
+            if(node.x == 0 && node.y == 0){
+                const rect = nodeForm.getBoundingClientRect();
+                nodeElement.style.left = `${rect.x + rect.width + 60}px`; // 초기 x 좌표 설정
+                nodeElement.style.top = `${rect.y + (rect.height / 2)}px`; // 초기 y 좌표 설정
+            }else{
+                nodeElement.style.left = `${node.x}px`; // 기존 x 좌표 설정
+                nodeElement.style.top = `${node.y}px`; // 기존 y 좌표 설정
+            }
 
             // 노드 내용 추가
             nodeElement.innerHTML = `
-            <div class="btn-wrap-close" onclick="deleteEmptyNode(this)">
+            <div class="btn-wrap-close" onclick="deleteNode(${node.id})">
                 <button type="button" class="btn-close" aria-label="Close"></button>
             </div>
+            <button type="button" onclick="insertContentsOnModal(${node.id}, '${encodeURIComponent(node.imageURL.replace(/['"]+/g, ''))}', '${node.prompt}')" class="btn btn-primary btnImgExpand" data-bs-toggle="modal" data-bs-target="#ImgExpandModal">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrows-fullscreen" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707m4.344 0a.5.5 0 0 1 .707 0l4.096 4.096V11.5a.5.5 0 1 1 1 0v3.975a.5.5 0 0 1-.5.5H11.5a.5.5 0 0 1 0-1h2.768l-4.096-4.096a.5.5 0 0 1 0-.707m0-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707m-4.344 0a.5.5 0 0 1-.707 0L1.025 1.732V4.5a.5.5 0 0 1-1 0V.525a.5.5 0 0 1 .5-.5H4.5a.5.5 0 0 1 0 1H1.732l4.096 4.096a.5.5 0 0 1 0 .707"/>
+                </svg>
+            </button>
             <div class="node-func">
                 <div class="info"><p>Prompt:</p><div class="prompt">${node.prompt}</div></div>
                 <div class="action">
@@ -996,20 +1388,20 @@
 
     function Img2ImgAddNode(parentNodeId){
         
-        
         const projectId = CurrentProjectId;
 
         const parentNode = document.getElementById(`node-${parentNodeId}`);
         const parentPrompt = parentNode.getElementsByClassName('prompt')[0].innerHTML;
 
 
-        console.log("img2img, parent:", parentNode);
+        //console.log("img2img, parent:", parentNode);
 
 
         const nodeElement = document.createElement('div');
         // nodeElement.id = `node-${node.id}`; // 각 노드에 고유 ID 추가
         nodeElement.className = 'node-box'; // CSS 스타일 적용을 위한 클래스
         nodeElement.classList.add('before');
+        nodeElement.classList.add('ImgNode-ChildOf-' + parentNodeId);
 
         const rect = parentNode.getBoundingClientRect();
         nodeElement.style.left = `${rect.x + rect.width + 40}px`; // 초기 x 좌표 설정
@@ -1017,13 +1409,16 @@
 
         // 노드 내용 추가
         nodeElement.innerHTML = `
-            <div class="btn-wrap-close" onclick="deleteEmptyNode(this)">
+            <div class="btn-wrap-close" onclick="deleteEmptyNode(this, ${parentNodeId})">
                 <button type="button" class="btn-close" aria-label="Close"></button>
             </div>
             <div class="node-func">
                 <form>
-                    <label for="prompt">Prompt:</label>
-                    <textarea type="text" class=" form-control" placeholder="${parentPrompt}" required>${parentPrompt}, </textarea>
+                    <label for="prompt">Parents Prompt</label>
+                    <input value="${parentPrompt}" type="text" class="form-control" placeholder="${parentPrompt}">
+                    <div class="plus"><i>+</i></div>
+                    <label for="prompt">Add Prompt</label>
+                    <textarea type="text" class=" form-control" placeholder="Add additional Prompts to Fix IMG"></textarea>
                 </form>
                 <div class="action">
                     <button onclick="GenImg2Img(this, ${parentNodeId})" type="button" class="btn generateBtn btn-primary">Genenrate</button>
@@ -1041,7 +1436,11 @@
 
         // 노드를 리스트에 추가
         nodesList.appendChild(nodeElement);
-
+        makeDraggable(nodeElement);
+        
+        
+        //console.log(document.querySelector(`#node-${parentNodeId} .img2img`), nodeElement.getElementsByClassName('generateBtn')[0]);
+        drawLine(document.querySelector(`#node-${parentNodeId} .img2img`), nodeElement.getElementsByClassName('generateBtn')[0], null);
     }
 
     
@@ -1052,7 +1451,10 @@
         const projectId = CurrentProjectId;
         const parentNodeId = parentId;
         const currentNode = target.parentElement.parentElement.parentElement;
-        const prompt = currentNode.querySelector('textarea').value;
+        
+        const additionalPrompt = currentNode.querySelector('textarea').value;
+        const parentsPrompt = currentNode.querySelector('input').value;
+        const prompt = parentsPrompt + ', ' + additionalPrompt;
         //console.log(currentNode)
 
 
@@ -1091,7 +1493,10 @@
             .then(data => {
                 console.log("Node created:", data);
                 // addNodeToList(data); // 새로 생성된 노드를 화면에 추가
-                currentNode.remove();
+                
+                // currentNode.remove();
+                deleteFinishedNode(currentNode, parentNodeId);
+                upadteNodeCheck();
             })
             .catch(error => {
                 console.error("Error creating node:", error);
@@ -1099,33 +1504,33 @@
     }
 
 
-    function deleteEmptyNode(target){
-        console.log("deleteEmptyNode");
+    function deleteEmptyNode(target, parentId){
         target.parentElement.remove();
+        const childPathes = document.getElementsByClassName('childPathOf-' + parentId);
+        for (let i = 0; i < childPathes.length; i++) {
+            childPathes[i].remove();
+        }
     }
-    // 노드 삭제됐을때 웹소켓으로 받은 노드 삭제
-    function deleteNodeElement(nodeID) {
-        const nodeElement = document.getElementById(`node-${nodeID}`);
-        const lineElement = document.getElementById(`line-${nodeID}`);
-        if (nodeElement) {
-            nodeElement.remove();
-            lineElement.remove();
-            console.log(`Node with ID ${nodeID} deleted from DOM.`);
-        } else {
-            console.error(`Node with ID ${nodeID} not found.`);
+    function deleteFinishedNode(target, parentId){
+        target.remove();
+        const childPathes = document.getElementsByClassName('childPathOf-' + parentId);
+        for (let i = 0; i < childPathes.length; i++) {
+            childPathes[i].remove();
         }
     }
 
-    // 노드 지우기 함수
-    function deleteNode(nodeID, nodeIdNumOnly, projectId) {
-        console.log("deleteNode");
-        const lineElement = document.getElementById(`line-${nodeID}`);
 
-        document.getElementById(nodeID).remove();
-        lineElement.remove();
+    // 노드 지우기 함수
+    const locallyDeletedNodes = new Set();
+
+    function deleteNode(nodeID) {
+        console.log("deleteNode");
+
+        // document.getElementById('node-' + nodeID).remove();
+        // document.getElementById(`line-${nodeID}`)?.remove();
         
         // DELETE API 호출
-        fetch(`/project/${projectId}/node/${nodeIdNumOnly}`, {
+        fetch(`/project/${CurrentProjectId}/node/${nodeID}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -1134,10 +1539,13 @@
         })
             .then(response => {
                 if (response.ok) {
+
+                    locallyDeletedNodes.add(nodeID);
+                    document.getElementById(`node-${nodeID}`)?.remove();
+                    document.getElementById(`path-${nodeID}`)?.remove();
+                    upadteNodeCheck();
                     console.log("Node deleted successfully.");
-                    // Node 삭제
-                    // document.getElementById(nodeID).remove();
-                    // lineElement.remove();
+                    
                 } else {
                     return response.json().then(err => {
                         console.error("Failed to delete node:", err.message);

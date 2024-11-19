@@ -20,10 +20,23 @@ body, html {
   overflow: hidden;
 }
 
+.bi-chevron-up {
+  opacity: 0.6;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: 0.2s ease-in;
+}
+.bi-chevron-up.hide {
+  transition: 0.2s ease-out;
+  transform: rotate(180deg);
+}
+.bi-chevron-up:hover {
+  opacity: 1;
+}
+
 #background {
   background: linear-gradient(to bottom, transparent 23px, #3d3d3d 23px) 0 0/200vw 24px repeat-y, linear-gradient(to right, transparent 23px, #3d3d3d 23px) 0 0/24px 200vh repeat-x #333333;
   position: absolute;
-  cursor: grab;
   width: 200vw;
   height: 200vh;
   margin: 0;
@@ -89,8 +102,7 @@ body, html {
 }
 
 h1 {
-  font-size: 2.25rem;
-  margin-bottom: 12px;
+  font-size: 2.75rem;
   letter-spacing: -1px;
 }
 
@@ -103,7 +115,14 @@ input:hover, textarea:hover {
 }
 
 #form-ID {
-  padding: 2rem;
+  padding: 3rem 0 3rem 3rem;
+}
+#form-ID .head {
+  margin-bottom: 1.25rem;
+  margin-right: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 #form-ID #projectForm {
   width: 100%;
@@ -149,20 +168,70 @@ input:hover, textarea:hover {
 }
 #form-ID #projectList {
   margin-top: 1rem;
+  overflow: hidden;
+  transition: 0.2s ease-in;
+  height: -moz-fit-content;
+  height: fit-content;
+}
+#form-ID #projectList.deActive {
+  transition: 0.2s ease-out;
+  height: 1px;
 }
 #form-ID #projectList h3 {
   font-size: 1.25rem;
   margin-bottom: 0.5rem;
 }
-#form-ID #projectList .openList {
+#form-ID #projectList .nav {
+  overflow: hidden;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+}
+#form-ID #projectList .nav .nav-link {
+  font-size: 1.2rem;
+  background-color: #252525;
+  color: rgba(255, 255, 255, 0.5);
+  transition: 0.2s ease-in;
+}
+#form-ID #projectList .nav .nav-link.active {
+  color: white;
+  background-color: #00aeff;
+  border-color: transparent;
+}
+#form-ID #projectList .nav .nav-link.active:hover {
+  color: white;
+}
+#form-ID #projectList .nav .nav-link:hover {
+  transition: 0.2s ease-in;
+  color: #00aeff;
+  border-color: transparent;
+}
+#form-ID #projectList .tab-pane {
+  margin: 2rem 2rem 0.5rem 0.25rem;
+}
+#form-ID #projectList .tab-pane .state {
+  min-height: 200px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+#form-ID #projectList .tab-pane .state p {
+  font-size: 2rem;
+  color: rgba(255, 255, 255, 0.35);
+  margin-bottom: 0.75rem;
+}
+#form-ID #projectList .funcBtn {
   width: 100%;
-  border-radius: 5rem;
+  border-radius: 0.5rem;
   border: none;
   background-color: #00aeff;
   color: white;
+  margin-top: 1rem;
+  padding: 0.65rem 1rem 0.5rem;
+  font-size: 1.25rem;
 }
 #form-ID #projectList .collapse {
-  margin-bottom: 1rem;
+  transition: 0.2s ease-in;
+  margin: 0.75rem 0 2rem;
 }
 #form-ID #projectList .collapse .card {
   transition: 0.15s ease-in;
@@ -180,48 +249,93 @@ input:hover, textarea:hover {
   width: 100%;
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
-  gap: 0.5rem;
-  background-color: #292929;
+  justify-content: flex-start;
+  align-items: center;
+  background-color: #1f1f1f;
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 0.5rem;
   overflow: hidden;
   transition: 0.2s ease-in;
 }
-#form-ID #projectList #projects .project:hover {
-  transition: 0.2s ease-in;
-  border: 1px solid #00aeff;
-}
-#form-ID #projectList #projects .project.active {
-  background-color: rgba(0, 0, 0, 0.2);
-}
 #form-ID #projectList #projects .project .info {
   display: flex;
 }
 #form-ID #projectList #projects .project .info img {
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   -o-object-fit: cover;
      object-fit: cover;
   border-right: 1px solid rgba(255, 255, 255, 0.15);
 }
-#form-ID #projectList #projects .project .info .projName {
-  padding: 0.75rem 1rem;
+#form-ID #projectList #projects .project .action {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  height: 100%;
+  padding: 1rem 1.5rem;
+}
+#form-ID #projectList #projects .project .action .projName {
   font-size: 1.15rem;
   color: rgba(255, 255, 255, 0.75);
 }
-#form-ID #projectList #projects .project .btn {
+#form-ID #projectList #projects .project .action .btns {
+  transition: 0.2s ease-in;
+  height: 0px;
+  opacity: 0;
+  display: flex;
+  background-color: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  width: 100%;
+}
+#form-ID #projectList #projects .project .action .btns .btn {
+  display: flex;
+  flex: 0.5;
+  justify-content: center;
+  height: 100%;
   margin: 0;
+  background-color: rgba(0, 0, 0, 0.3);
   border-radius: 0;
-  background-color: transparent;
   border: none;
-  border-left: 1px solid rgba(255, 255, 255, 0.15);
   color: #00aeff;
+  transition: 0.2s ease-in;
+}
+#form-ID #projectList #projects .project .action .btns .btn:hover {
+  transition: 0.2s ease-out;
+  background-color: rgba(0, 0, 0, 0.15);
+}
+#form-ID #projectList #projects .project .action .btns .btn:last-of-type {
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ff3c00;
+}
+#form-ID #projectList #projects .project:hover, #form-ID #projectList #projects .project.active {
+  transition: 0.2s ease-in;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  opacity: 1;
+}
+#form-ID #projectList #projects .project:hover .btns, #form-ID #projectList #projects .project.active .btns {
+  transition: 0.2s ease-out;
+  height: 36px;
+  opacity: 1;
+}
+#form-ID #projectList #projects .project.active {
+  transition: 0.2s ease-out;
+  border: 1px solid #00aeff;
+  background-color: #292929;
+}
+#form-ID #projectList #projects .project.active .btn {
+  transition: 0.2s ease-out;
+}
+#form-ID #projectList #projects .project.active .btn:first-of-type {
+  color: rgba(255, 255, 255, 0.35);
 }
 
 #nodeForm {
   transition: ease-in-out 0.2s;
   border: 1px solid rgba(0, 0, 0, 0.6);
+  cursor: grab;
   position: absolute;
   width: -moz-fit-content;
   width: fit-content;
@@ -235,20 +349,60 @@ input:hover, textarea:hover {
   background: rgba(0, 0, 0, 0.6);
   -webkit-backdrop-filter: blur(4px);
           backdrop-filter: blur(4px);
+  overflow: hidden;
 }
 #nodeForm:hover {
   border: 1px solid #00aeff;
 }
-#nodeForm h3 {
+#nodeForm #loadingIndicator {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+}
+#nodeForm #loadingIndicator .spinner-border {
+  zoom: 2;
+}
+#nodeForm .head {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+#nodeForm .head h3 {
   font-size: 1.5rem;
   color: rgba(255, 255, 255, 0.85);
-  margin-bottom: 0.75rem;
   width: 100%;
+  user-drag: none;
+  -webkit-user-drag: none;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+#nodeForm .head svg {
+  margin-top: 0;
 }
 #nodeForm form {
   display: flex;
   flex-direction: column;
   width: 100%;
+  padding-top: 0.75rem;
+  overflow: hidden;
+  transition: 0.2s ease-in;
+  opacity: 1;
+  height: -moz-fit-content;
+  height: fit-content;
+}
+#nodeForm form.deActive {
+  transition: 0.2s ease-out;
+  opacity: 0;
+  height: 0px;
 }
 #nodeForm input, #nodeForm textarea {
   border-radius: 1.5rem;
@@ -299,10 +453,11 @@ input:hover, textarea:hover {
   -ms-user-select: none;
   transition: ease-in-out 0.2s;
   border: 1px solid rgba(0, 0, 0, 0.6);
+  cursor: grab;
   border-radius: 1rem; /* 박스 모서리 둥글게 */
   width: 200px; /* 박스 너비 */
   position: absolute; /* 위치 조정 가능하도록 설정 */
-  cursor: move; /* 마우스 커서를 드래그 가능으로 변경 */
+  cursor: grab;
   overflow: hidden;
   background: rgb(17, 17, 17);
   -webkit-backdrop-filter: blur(4px);
@@ -314,6 +469,7 @@ input:hover, textarea:hover {
 }
 .node-box.before {
   border: 2px solid #00aeff;
+  min-width: 240px;
 }
 .node-box:hover {
   border: 1px solid #00aeff;
@@ -340,6 +496,21 @@ input:hover, textarea:hover {
   transition: 0.2s ease-in;
   background-color: rgba(0, 0, 0, 0.6);
 }
+.node-box .btnImgExpand {
+  position: absolute;
+  top: 176px;
+  right: 4px;
+  margin: 0.25rem;
+  border-radius: 10rem;
+  background-color: rgba(63, 63, 63, 0.65);
+  -webkit-backdrop-filter: blur(4px);
+          backdrop-filter: blur(4px);
+  transition: 0.2s ease-in;
+}
+.node-box .btnImgExpand:hover {
+  transition: 0.2s ease-in;
+  background-color: rgba(0, 0, 0, 0.65);
+}
 .node-box .node-func {
   padding: 0.75rem;
 }
@@ -357,6 +528,26 @@ input:hover, textarea:hover {
 .node-box .node-func .info .prompt {
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.85);
+}
+.node-box .node-func form {
+  margin: 1rem 0;
+}
+.node-box .node-func form label {
+  margin-bottom: 0.25rem;
+  margin-left: 0.25rem;
+}
+.node-box .node-func form textarea {
+  min-height: 100px;
+}
+.node-box .node-func form .plus {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.node-box .node-func form .plus i {
+  font-size: 2rem;
+  font-style: normal;
+  color: #00aeff;
 }
 .node-box .node-func .action {
   display: flex;
@@ -379,7 +570,7 @@ input:hover, textarea:hover {
   justify-content: center;
   align-items: center;
   width: 100%;
-  height: 136px;
+  height: 328px;
 }
 .node-box .loading.hide {
   display: none;
@@ -431,4 +622,95 @@ input:hover, textarea:hover {
 }
 #SignOffcanvas .offcanvas-body {
   padding: 0 !important;
+}
+#SignOffcanvas #LogOut {
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+}
+#SignOffcanvas #LogOut h3 {
+  margin-bottom: 1rem;
+}
+#SignOffcanvas #LogOut .btn {
+  width: 100%;
+  color: #ff3c00;
+}
+
+.modal-backdrip {
+  -webkit-backdrop-filter: blur(8px) !important;
+          backdrop-filter: blur(8px) !important;
+  background-color: rgba(0, 0, 0, 0.4);
+  --bs-backdrop-opacity: unset;
+}
+
+#ImgExpandModal .btn-wrap-close {
+  position: absolute;
+  z-index: 1000;
+  top: 0;
+  right: 0;
+  margin: 1rem;
+  border-radius: 10rem;
+  background-color: rgba(0, 0, 0, 0.3);
+  -webkit-backdrop-filter: blur(4px);
+          backdrop-filter: blur(4px);
+  transition: 0.2s ease-in;
+}
+#ImgExpandModal .btn-wrap-close .btn-close {
+  margin: 0.5rem;
+  font-size: 1.25rem;
+}
+#ImgExpandModal .btn-wrap-close .btn-close:focus {
+  box-shadow: none;
+}
+#ImgExpandModal .btn-wrap-close:hover {
+  transition: 0.2s ease-in;
+  background-color: rgba(0, 0, 0, 0.6);
+}
+#ImgExpandModal .modal-content {
+  overflow: hidden;
+  background-color: rgb(0, 0, 0);
+  border: 1px solid #00aeff;
+  border-radius: 2rem;
+}
+#ImgExpandModal .modal-content .modal-body {
+  padding: 0;
+}
+#ImgExpandModal .modal-content .modal-body img {
+  width: 100%;
+  height: 100%;
+  -o-object-fit: contain;
+     object-fit: contain;
+}
+#ImgExpandModal .modal-content .modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 2rem;
+}
+#ImgExpandModal .modal-content .modal-footer .info {
+  max-width: 520px;
+}
+#ImgExpandModal .modal-content .modal-footer .info p {
+  margin-bottom: 0.5rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+#ImgExpandModal .modal-content .modal-footer .info p span {
+  color: #00aeff;
+}
+#ImgExpandModal .modal-content .modal-footer .info #expandModalPrompt {
+  font-size: 1.25rem;
+}
+#ImgExpandModal .modal-content .modal-footer .btnGroup {
+  display: flex;
+  flex-direction: column;
+  margin-top: 2rem;
+}
+#ImgExpandModal .modal-content .modal-footer .btnGroup .btn {
+  width: 150px;
+  height: 45px;
+}
+#ImgExpandModal .modal-content .modal-footer .btnGroup .btn:first-of-type {
+  margin: 0;
+  margin-bottom: 0.75rem;
 }/*# sourceMappingURL=style.css.map */

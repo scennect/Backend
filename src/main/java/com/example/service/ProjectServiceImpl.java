@@ -37,15 +37,20 @@ public class ProjectServiceImpl implements ProjectService{
         // 프로젝트 저장 : 프로젝트명, 공개여부로 project build
         Project project = ProjectConverter.toProjectEntity(projectRequestDTO);
 
+        Project savedProject = projectRepository.save(project);
+
         // 프로젝트 생성 유저 저장
         projectUserService.saveProjectUser(project, user);
 
+        log.info("팀원 처리 시작");
         // 팀원 초대 처리
-        Optional.ofNullable(projectRequestDTO.getMemberEmails())
-                .ifPresent(emailList -> emailList.forEach(email ->
-                        projectUserService.saveProjectUserByEmail(project, email)));
+        List<String> emails = projectRequestDTO.getMemberEmails();
+        if(emails != null){
+            emails.forEach(email ->
+                    projectUserService.saveProjectUserByEmail(project, email));
+        }
+        log.info("팀원 처리 완료");
 
-        Project savedProject = projectRepository.save(project);
 
         return savedProject.getId();
     }
