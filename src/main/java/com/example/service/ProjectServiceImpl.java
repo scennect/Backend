@@ -11,6 +11,7 @@ import com.example.dto.request.UpdateProjectRequestDTO;
 import com.example.dto.response.NodeResponseDTO;
 import com.example.dto.response.ProjectResponseDTO;
 import com.example.repository.ProjectRepository;
+import com.example.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,8 +27,10 @@ import java.util.Optional;
 public class ProjectServiceImpl implements ProjectService{
 
     private final ProjectRepository projectRepository;
+    private final UserRepository userRepository;
 
     private final NodeService nodeService;
+    private final UserService userService;
     private final ProjectUserService projectUserService;
 
     // 프로젝트 처음 생성할때 실행
@@ -42,15 +45,15 @@ public class ProjectServiceImpl implements ProjectService{
         // 프로젝트 생성 유저 저장
         projectUserService.saveProjectUser(project, user);
 
-        log.info("팀원 처리 시작");
         // 팀원 초대 처리
         List<String> emails = projectRequestDTO.getMemberEmails();
         if(emails != null){
             emails.forEach(email ->
-                    projectUserService.saveProjectUserByEmail(project, email));
+                    {
+                        Optional<User> member = userRepository.findByEmail(email);
+                        member.ifPresent(value -> projectUserService.saveProjectUser(project, value));
+                    });
         }
-        log.info("팀원 처리 완료");
-
 
         return savedProject.getId();
     }
@@ -116,7 +119,10 @@ public class ProjectServiceImpl implements ProjectService{
         // 팀원 초대 처리
         Optional.ofNullable(updateProjectRequestDTO.getMemberEmails())
                 .ifPresent(emailList -> emailList.forEach(email ->
-                        projectUserService.saveProjectUserByEmail(project, email)));
+                        {
+                            Optional<User> member = userRepository.findByEmail(email);
+                            member.ifPresent(value -> projectUserService.saveProjectUser(project, value));
+                        }));
 
         projectRepository.save(project);
     }

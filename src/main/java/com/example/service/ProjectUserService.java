@@ -5,13 +5,12 @@ import com.example.domain.User;
 import com.example.dto.ProjectDTO;
 import com.example.dto.request.UpdateProjectRequestDTO;
 
+import java.lang.reflect.Member;
 import java.util.List;
 
 public interface ProjectUserService {
 
     public void saveProjectUser(Project project, User user);
-
-    public void saveProjectUserByEmail(Project project, String email);
 
     public List<ProjectDTO> findAllProjects(User user);
 
