@@ -80,13 +80,14 @@ public class NodeServiceImpl implements NodeService{
         // nodeId 로 node 찾기
         Node findNode = findNodeById(nodeId);
 
-        imageService.deleteS3Image(findNode.getImageURL());
 
         // node 생성자 인지 확인
-        if (!findNode.getUser().equals(user)) {
+        if (!projectUserService.checkProjectUserExists(findNode.getProject(), user)) {
             throw new GeneralException(ErrorStatus.NODE_INVALID_USER);
         }
         else {
+            imageService.deleteS3Image(findNode.getImageURL());
+
             Node parentNode = findNode.getParentNode();
             // 부모노드가 있는 경우
             if (parentNode!=null) {
