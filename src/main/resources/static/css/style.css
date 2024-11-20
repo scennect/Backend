@@ -50,6 +50,7 @@ body, html {
   border-radius: 50%; /* 원형으로 만들기 */
   pointer-events: none; /* 클릭 이벤트 차단 */
   z-index: 1000; /* 다른 요소 위에 표시 */
+  transition: transform 0.1s linear;
 }
 .cursor span {
   position: relative;

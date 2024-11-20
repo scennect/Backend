@@ -6,6 +6,7 @@ import lombok.Getter;
 public class MouseDTO {
 
     String name;
+    String type;
     int x;
     int y;
 }

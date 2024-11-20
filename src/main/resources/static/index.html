@@ -1021,6 +1021,9 @@
                     // 노드의 위치를 새로운 좌표로 업데이트
                     nodeElement.style.left = `${nodeData.x}px`;
                     nodeElement.style.top = `${nodeData.y}px`;
+
+                    // 선 업데이트
+                    updateLine(nodeElement);
                 } else {
                     console.error(`Node with ID ${nodeData.nodeId} not found.`);
                 }
@@ -1029,25 +1032,35 @@
             // WebSocket을 통해 마우스 좌표 수신
             stompClient.subscribe(`/topic/mouse/${projectId}`, function (message) {
                 const mouseData = JSON.parse(message.body);
-                const { name, x, y } = mouseData;
 
-                // 커서 요소가 이미 존재하는지 확인
-                if (!userCursors[name]) {
-                    // 커서 요소 생성
-                    const cursorElement = document.createElement('div');
-                    cursorElement.className = 'cursor';
-                    cursorElement.style.position = 'absolute';
-                    cursorElement.innerHTML = `<span>${name}</span>`;
-                    document.body.appendChild(cursorElement);
-
-                    // 사용자 커서 저장
-                    userCursors[name] = cursorElement;
+                if (mouseData.type === "disconnect") {
+                    const { name } = mouseData; // mouseData에서 name 가져오기
+                    if (userCursors[name]) {
+                        userCursors[name].remove(); // DOM 요소 삭제
+                        delete userCursors[name]; // userCursors에서 제거
+                    }
                 }
+                else{
+                    const { name, x, y } = mouseData;
 
-                // 커서 위치 업데이트
-                const cursorElement = userCursors[name];
-                cursorElement.style.left = `${x}px`;
-                cursorElement.style.top = `${y}px`;
+                    // 커서 요소가 이미 존재하는지 확인
+                    if (!userCursors[name]) {
+                        // 커서 요소 생성
+                        const cursorElement = document.createElement('div');
+                        cursorElement.className = 'cursor';
+                        cursorElement.style.position = 'absolute';
+                        cursorElement.innerHTML = `<span>${name}</span>`;
+                        document.body.appendChild(cursorElement);
+
+                        // 사용자 커서 저장
+                        userCursors[name] = cursorElement;
+                    }
+
+                    // 커서 위치 업데이트
+                    const cursorElement = userCursors[name];
+                    cursorElement.style.left = `${x}px`;
+                    cursorElement.style.top = `${y}px`;
+                }
             });
 
             // 노드 삭제 이벤트 구독
@@ -1063,7 +1076,10 @@
                 }
 
                 if(document.getElementById(`node-${nodeID}`)){
-                    deleteNode(nodeID); // 해당 노드를 삭제하는 함수 호출
+                    document.getElementById(`node-${nodeID}`)?.remove();
+                    document.getElementById(`path-${nodeID}`)?.remove();
+                    upadteNodeCheck();
+                    console.log("Node deleted successfully.");
                 }
             });
 
@@ -1076,10 +1092,42 @@
             const mouseData = {
                 name: currentUserName, // 사용자 이름 추가
                 x: event.clientX + window.scrollX,
-                y: event.clientY + window.scrollY
+                y: event.clientY + window.scrollY,
+                type: "connect"
             };
             stompClient.send(`/app/mouse/${CurrentProjectId}`, {}, JSON.stringify(mouseData));
         }
+    });
+
+    document.addEventListener("visibilitychange", function () {
+        if (document.visibilityState === "hidden") {
+            // 사용자가 페이지를 벗어남
+            const mouseData = {
+                type: "disconnect",
+                name: currentUserName,
+                projectId: CurrentProjectId,
+            };
+            stompClient.send(`/app/mouse/${CurrentProjectId}`, {}, JSON.stringify(mouseData));
+        } else if (document.visibilityState === "visible") {
+            // 사용자가 페이지로 돌아옴
+            const mouseData = {
+                type: "connect", // 재접속 메시지
+                name: currentUserName,
+                x: window.scrollX,
+                y: window.scrollY,
+                projectId: CurrentProjectId,
+            };
+            stompClient.send(`/app/mouse/${CurrentProjectId}`, {}, JSON.stringify(mouseData));
+        }
+    });
+
+    window.addEventListener("beforeunload", function () {
+        const mouseData = {
+            type: "disconnect",
+            name: currentUserName,
+            projectId: CurrentProjectId,
+        };
+        stompClient.send(`/app/mouse/${CurrentProjectId}`, {}, JSON.stringify(mouseData));
     });
 
     //드래그 가능한 기능을 추가하는 함수 - nodeForm에 대해 적용되어있음
