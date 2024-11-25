@@ -16,4 +16,6 @@ public class NodeRequestDTO {
     private Long parentNodeId;
 
     private Long projectId;
+
+    private Boolean seed;
 }

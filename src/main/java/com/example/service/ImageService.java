@@ -10,7 +10,7 @@ public interface ImageService {
 
     public String generateTextToImage(String prompt);
 
-    public String generateImageToImage(String prompt, String imageURL);
+    public String generateImageToImage(String prompt, String imageURL, boolean seed);
 
     public void deleteS3Image(String imageURL);
 
