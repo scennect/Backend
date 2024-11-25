@@ -54,14 +54,14 @@ public class ImageServiceImpl implements ImageService{
     }
 
     @Override
-    public String generateImageToImage(String prompt, String imageURL) {
+    public String generateImageToImage(String prompt, String imageURL, boolean seed) {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         String url = "https://1dc6-124-55-57-87.ngrok-free.app//modify-image";  // FastAPI 서버의 URL
 
-        String requestBody = "{\"prompt\": \"" + prompt + "\", \"imageURL\": " + imageURL + "}";
+        String requestBody = "{\"prompt\": \"" + prompt + "\", \"imageURL\": " + imageURL  + "\", \"seed\": " + seed + "}";
 
         HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
 
