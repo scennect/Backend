@@ -11,6 +11,7 @@ import com.example.dto.request.UpdateProjectRequestDTO;
 import com.example.dto.response.NodeResponseDTO;
 import com.example.dto.response.ProjectResponseDTO;
 import com.example.repository.ProjectRepository;
+import com.example.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,26 +27,35 @@ import java.util.Optional;
 public class ProjectServiceImpl implements ProjectService{
 
     private final ProjectRepository projectRepository;
+    private final UserRepository userRepository;
 
     private final NodeService nodeService;
+    private final UserService userService;
     private final ProjectUserService projectUserService;
 
     // 프로젝트 처음 생성할때 실행
     @Override
-    public void saveProject(ProjectRequestDTO projectRequestDTO, User user) {
+    public Long saveProject(ProjectRequestDTO projectRequestDTO, User user) {
 
         // 프로젝트 저장 : 프로젝트명, 공개여부로 project build
         Project project = ProjectConverter.toProjectEntity(projectRequestDTO);
+
+        Project savedProject = projectRepository.save(project);
 
         // 프로젝트 생성 유저 저장
         projectUserService.saveProjectUser(project, user);
 
         // 팀원 초대 처리
-        Optional.ofNullable(projectRequestDTO.getMemberEmails())
-                .ifPresent(emailList -> emailList.forEach(email ->
-                        projectUserService.saveProjectUserByEmail(project, email)));
+        List<String> emails = projectRequestDTO.getMemberEmails();
+        if(emails != null){
+            emails.forEach(email ->
+                    {
+                        Optional<User> member = userRepository.findByEmail(email);
+                        member.ifPresent(value -> projectUserService.saveProjectUser(project, value));
+                    });
+        }
 
-        projectRepository.save(project);
+        return savedProject.getId();
     }
 
 
@@ -61,7 +71,7 @@ public class ProjectServiceImpl implements ProjectService{
             }
         }
 
-        ProjectResponseDTO projectResponseDTO = ProjectConverter.toProjectResponseDTO(project);
+        ProjectResponseDTO projectResponseDTO = ProjectConverter.toProjectResponseDTO(project, user.getName());
 
         List<Node> nodes = project.getNodes();
 
@@ -109,7 +119,10 @@ public class ProjectServiceImpl implements ProjectService{
         // 팀원 초대 처리
         Optional.ofNullable(updateProjectRequestDTO.getMemberEmails())
                 .ifPresent(emailList -> emailList.forEach(email ->
-                        projectUserService.saveProjectUserByEmail(project, email)));
+                        {
+                            Optional<User> member = userRepository.findByEmail(email);
+                            member.ifPresent(value -> projectUserService.saveProjectUser(project, value));
+                        }));
 
         projectRepository.save(project);
     }
@@ -130,5 +143,20 @@ public class ProjectServiceImpl implements ProjectService{
         project.updateNode(node);
         projectRepository.save(project);
     }
+
+    @Override
+    public void removeProject(Long projectId, User user) {
+
+        Project project = findProjectById(projectId);
+
+        // 프로젝트 권한이 없으므로 Error return
+        if (!projectUserService.checkProjectUserExists(project, user)) {
+            throw new GeneralException(ErrorStatus.PROJECT_USER_NOT_FOUND);
+        }
+
+        projectRepository.delete(project);
+    }
+
+
 
 }

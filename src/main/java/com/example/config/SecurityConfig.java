@@ -1,5 +1,6 @@
 package com.example.config;
 
+import com.example.jwt.CustomLogoutFilter;
 import com.example.jwt.JWTFilter;
 import com.example.jwt.JWTUtil;
 import com.example.jwt.LoginFilter;
@@ -18,6 +19,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -37,10 +39,11 @@ public class SecurityConfig {
     public WebSecurityCustomizer webSecurityCustomizer() {
         return web -> {
             web.ignoring()
-                    .requestMatchers("/join",
+                    .requestMatchers("/join", "/check-id",
                             "/index.html", "/login.html", "/favicon.ico",
                             "/topic/**", "/app/**", "/ws/**",
-                            "/api-docs/**", "/swagger-ui/**", "/swagger-ui.html/**", "/v3/api-docs/**", "/swagger-ui/index.html#/**");// 필터를 타면 안되는 경로
+                            "/api-docs/**", "/swagger-ui/**", "/swagger-ui.html/**", "/v3/api-docs/**", "/swagger-ui/index.html#/**",
+                            "/css/**", "/js/**", "/img/**");// 필터를 타면 안되는 경로
         };
     }
 
@@ -66,8 +69,7 @@ public class SecurityConfig {
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                         CorsConfiguration corsConfiguration = new CorsConfiguration();
 
-                        //프론트 단에서 요청을 보낼 주소
-                        corsConfiguration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+                        corsConfiguration.addAllowedOrigin("http://52.78.73.212:8000");
 
                         // GET, POST, PUT, DELETE, PATCH 등 모든 메소드 허용
                         corsConfiguration.setAllowedMethods(Collections.singletonList("*"));
@@ -98,13 +100,17 @@ public class SecurityConfig {
         //경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/", "/login", "/join", "/reissue",
+                        .requestMatchers("/login").permitAll()
+
+                        .requestMatchers("/", "/join", "check-id", "/reissue",
                                 "/index.html", "/login.html", "/favicon.ico",
                                 "/topic/**", "/app/**", "/ws/**").permitAll()
-                        .requestMatchers("/node/**", "/mypage", "/project/**").hasRole("USER")
-                        .requestMatchers( "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
-                        .anyRequest().authenticated());
+                        .requestMatchers("/node/**", "/mypage", "/project/**", "/logout").hasRole("USER")
+
+                        .requestMatchers( "/swagger-ui/**", "/v3/api-docs/**").permitAll());
+
+//                        .anyRequest().authenticated());
 
         //JWTFilter 추가
         http
@@ -114,6 +120,9 @@ public class SecurityConfig {
                 //UsernamePasswordAuthenticationFilter 자리에 LoginFilter를 추가
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, tokenService, redisClient), UsernamePasswordAuthenticationFilter.class);
 
+
+        http
+                .addFilterBefore(new CustomLogoutFilter(jwtUtil, redisClient), LogoutFilter.class);
 
         //세션 설정 : STATELESS
         http

@@ -3,7 +3,6 @@ package com.example.converter;
 import com.example.domain.Project;
 import com.example.dto.request.ProjectRequestDTO;
 import com.example.dto.response.ProjectResponseDTO;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -18,10 +17,12 @@ public class ProjectConverter {
     }
 
     // ProjectRequestDTO 를 Project Entity로 변환
-    public static ProjectResponseDTO toProjectResponseDTO(Project project) {
+    public static ProjectResponseDTO toProjectResponseDTO(Project project, String name) {
         return ProjectResponseDTO.builder()
                 .id(project.getId())
-                .name(project.getName())
+                .projectName(project.getName())
+                // 아래 name 은 사용자의 별명 이름
+                .projectUserName(name)
                 .isPublic(project.getIsPublic())
                 .projectImageURL(project.getProjectImageURL())
                 .build();

@@ -38,16 +38,16 @@ public enum ErrorStatus implements BaseCode {
     //image Error
     IMAGE_GENERATE_FAILURE(HttpStatus.BAD_REQUEST, "IMAGE4001", "이미지 생성에 실패했습니다."),
     IMAGE_UPLOAD_FAILURE(HttpStatus.BAD_REQUEST, "IMAGE4002", "이미지 업로드에 실패했습니다."),
-    PARENT_IMAGE_URL_NOT_CORRECT(HttpStatus.BAD_REQUEST, "IMAGE4003", "부모 이미지 URL이 올바르지 않습니다."),
+    IMAGE_DELETE_FAILURE(HttpStatus.BAD_REQUEST, "IMAGE4003", "이미지 삭제에 실패했습니다."),
+    PARENT_IMAGE_URL_NOT_CORRECT(HttpStatus.BAD_REQUEST, "IMAGE4004", "부모 이미지 URL이 올바르지 않습니다."),
 
     // Token Error
     ACCESS_TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "TOKEN4001", "Access 토큰이 없습니다."),
-    INVALID_ACCESS_TOKEN(HttpStatus.BAD_REQUEST, "TOKEN4002", "Access 토큰이 유효하지 않습니다."),
+    ACCESS_TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "TOKEN4002", "Access 토큰이 유효하지 않습니다."),
 
     REFRESH_TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "TOKEN4003", "Refresh 토큰이 없습니다."),
-    INVALID_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, "TOKEN4004", "Refresh 토큰이 유효하지 않습니다."),
-
-    TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "TOKEN4005", "토큰이 만료되었습니다."),
+    REFRESH_TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "TOKEN4004", "Refresh 토큰이 만료됐습니다."),
+    INVALID_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, "TOKEN4005", "Refresh 토큰이 유효하지 않습니다."),
 
     // Redis Error
     REDIS_NOT_FOUND(HttpStatus.BAD_REQUEST, "REDIS4001", "Redis 설정에 오류가 발생했습니다.");

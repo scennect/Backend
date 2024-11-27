@@ -17,6 +17,9 @@ public class NodeResponseDTO {
     private String imageURL;
     private Long parentNodeId;
 
+    private int x;
+    private int y;
+
     @Builder.Default
     private List<NodeResponseDTO> children = new ArrayList<>();
 

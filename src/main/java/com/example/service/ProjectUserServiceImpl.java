@@ -28,32 +28,22 @@ public class ProjectUserServiceImpl implements ProjectUserService{
 
     @Override
     public void saveProjectUser(Project project, User user) {
-
-        ProjectUser projectUser = ProjectUser.builder()
-                .project(project)
-                .user(user)
-                .build();
-        // 프로젝트에 유저 추가
-        project.updateProjectUsers(projectUser);
-        // 프로젝트 유저 저장
-        projectUserRepository.save(projectUser);
-    }
-
-
-    @Override
-    public void saveProjectUserByEmail(Project project, String email) {
-        try {
-            User member = userService.findUserByEmail(email);
-            if (!checkProjectUserExists(project, member)) { // 중복 체크
-                saveProjectUser(project, member);
-            } else {
-                log.info("User already in project: " + email);
-            }
-        } catch (GeneralException e) {
-            log.info("User not found with email: " + email);
+        if (!checkProjectUserExists(project, user)) { // 중복 체크
+            ProjectUser projectUser = ProjectUser.builder()
+                    .project(project)
+                    .user(user)
+                    .build();
+            // 프로젝트에 유저 추가
+            project.updateProjectUsers(projectUser);
+            // 프로젝트 유저 저장
+            projectUserRepository.save(projectUser);
+        } else {
+            log.info("User already in project: " + user.getEmail());
         }
-    }
 
+
+
+    }
 
     @Override
     // 내가 속한 프로젝트들 조회

@@ -6,6 +6,7 @@ import com.example.converter.NodeConverter;
 import com.example.domain.Node;
 import com.example.domain.Project;
 import com.example.domain.User;
+import com.example.dto.CoordinateDTO;
 import com.example.dto.request.NodeRequestDTO;
 import com.example.dto.response.NodeResponseDTO;
 import com.example.repository.NodeRepository;
@@ -24,6 +25,7 @@ public class NodeServiceImpl implements NodeService{
     private final NodeRepository nodeRepository;
 
     private final ImageService imageService;
+    private final ProjectUserService projectUserService;
 
     @Override
     public NodeResponseDTO saveNode(NodeRequestDTO nodeRequestDto, User user, Project project) {
@@ -40,7 +42,7 @@ public class NodeServiceImpl implements NodeService{
         Long parentNodeId = nodeRequestDto.getParentNodeId();
         if (parentNodeId != null) {
             parentNode = findNodeById(nodeRequestDto.getParentNodeId());
-            imageURL = imageService.generateImageToImage(nodeRequestDto.getPrompt(), parentNode.getImageURL());
+            imageURL = imageService.generateImageToImage(nodeRequestDto.getPrompt(), parentNode.getImageURL(), nodeRequestDto.getSeed());
 
             // 로컬에서 위에 generateImage 없이 돌릴때 사용할 용도
             //imageURL = "https://hongik-s3.s3.amazonaws.com/42_10_7.5.png";
@@ -55,7 +57,7 @@ public class NodeServiceImpl implements NodeService{
         }
 
         // build new node
-        Node newNode = NodeConverter.toNodeEntity(nodeRequestDto.getPrompt(), imageURL, user, project, parentNode);
+        Node newNode = NodeConverter.toNodeEntity(nodeRequestDto, imageURL, user, project, parentNode);
 
         if (parentNode != null) {
             parentNode.addChild(newNode);
@@ -63,6 +65,11 @@ public class NodeServiceImpl implements NodeService{
 
         // save new node
         Node saveNode = nodeRepository.save(newNode);
+
+        // 만약 프로젝트 대표 이미지가 없으면 새로 생성한 노드의 이미지로 설정
+        if(project.getProjectImageURL() == null){
+            project.updateProjectImageURL(saveNode.getImageURL());
+        }
 
         // DTO로 반환해서 return
         return NodeConverter.toNodeResponseDTO(saveNode);
@@ -73,11 +80,14 @@ public class NodeServiceImpl implements NodeService{
         // nodeId 로 node 찾기
         Node findNode = findNodeById(nodeId);
 
+
         // node 생성자 인지 확인
-        if (!findNode.getUser().equals(user)) {
+        if (!projectUserService.checkProjectUserExists(findNode.getProject(), user)) {
             throw new GeneralException(ErrorStatus.NODE_INVALID_USER);
         }
         else {
+            imageService.deleteS3Image(findNode.getImageURL());
+
             Node parentNode = findNode.getParentNode();
             // 부모노드가 있는 경우
             if (parentNode!=null) {
@@ -137,6 +147,20 @@ public class NodeServiceImpl implements NodeService{
     public Node findNodeById(Long nodeId) {
         return nodeRepository.findById(nodeId).orElseThrow(()
                 -> new GeneralException(ErrorStatus.NODE_NOT_FOUND));
+    }
+
+    @Override
+    public void updateCoordinate(Long nodeId, User user, CoordinateDTO coordinateDTO) {
+
+        Node node = findNodeById(nodeId);
+
+        Project project = node.getProject();
+
+        // 만약 허용된 사용자면
+        if(projectUserService.checkProjectUserExists(project, user)){
+            node.updateCoordinate(coordinateDTO.getX(), coordinateDTO.getY());
+            nodeRepository.save(node);
+        }
     }
 
 }

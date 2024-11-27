@@ -1,7 +1,9 @@
 package com.example.service;
 
+import com.amazonaws.SdkClientException;
 import com.example.apiPayload.code.status.ErrorStatus;
 import com.example.apiPayload.exception.GeneralException;
+import com.example.config.S3Config;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,13 +25,17 @@ public class ImageServiceImpl implements ImageService{
 
     private final RestTemplate restTemplate;
 
+    private final S3Config s3Config;
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucketName;
+
     @Override
     public String generateTextToImage(String prompt) {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        String url = "http://localhost:8000/generate-image";  // FastAPI 서버의 URL
+        String url = "https://1dc6-124-55-57-87.ngrok-free.app//generate-image";  // FastAPI 서버의 URL
 
         String requestBody = "{\"prompt\": \"" + prompt + "\"}";
 
@@ -37,7 +43,9 @@ public class ImageServiceImpl implements ImageService{
 
         try {
             // FastAPI 서버에 POST 요청을 보내 이미지 생성
+            log.info("generate-image 요청 시작");
             ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class);
+            log.info("generate-image 요청 완료");
             return response.getBody();
         } catch (Exception e) {
             log.error("Failed to generate image: {}", e.getMessage());
@@ -46,24 +54,38 @@ public class ImageServiceImpl implements ImageService{
     }
 
     @Override
-    public String generateImageToImage(String prompt, String imageURL) {
+    public String generateImageToImage(String prompt, String imageURL, boolean seed) {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        String url = "http://localhost:8000/modify-image";  // FastAPI 서버의 URL
+        String url = "https://1dc6-124-55-57-87.ngrok-free.app//modify-image";  // FastAPI 서버의 URL
 
-        String requestBody = "{\"prompt\": \"" + prompt + "\", \"imageURL\": " + imageURL + "}";
+        String requestBody = "{\"prompt\": \"" + prompt + "\", \"imageURL\": " + imageURL  + "\", \"seed\": " + seed + "}";
 
         HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
 
         try {
             // FastAPI 서버에 POST 요청을 보내 이미지 생성
+            log.info("modify-image 요청 시작");
             ResponseEntity<String> response = restTemplate.postForEntity(url, requestEntity, String.class);
+            log.info("modify-image 요청 끝");
             return response.getBody();
         } catch (Exception e) {
             log.error("Failed to generate image: {}", e.getMessage());
             throw new GeneralException(ErrorStatus.IMAGE_GENERATE_FAILURE);
+        }
+    }
+
+    @Override
+    public void deleteS3Image(String imageURL) {
+        String filename = imageURL.substring(imageURL.lastIndexOf("/") + 1);
+        log.info("delete filename = " + filename);
+        try{
+            s3Config.amazonS3Client().deleteObject(bucketName, filename);
+        }catch (SdkClientException e){
+            log.warn("S3 삭제에 실패했습니다.");
+            throw new GeneralException(ErrorStatus.IMAGE_DELETE_FAILURE);
         }
     }
 

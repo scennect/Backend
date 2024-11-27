@@ -14,7 +14,7 @@ import java.util.List;
 
 public interface ProjectService {
 
-    public void saveProject(ProjectRequestDTO projectRequestDTO, User user);
+    public Long saveProject(ProjectRequestDTO projectRequestDTO, User user);
 
     public ProjectResponseDTO viewProjectByIdAndUser(Long projectId, User user);
 
@@ -25,4 +25,6 @@ public interface ProjectService {
     public Project verifyProjectAccess(Long projectId, User user);
 
     public void addNode(Project project, Node node);
+
+    void removeProject(Long projectId, User user);
 }
