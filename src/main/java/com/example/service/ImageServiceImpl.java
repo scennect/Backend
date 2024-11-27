@@ -61,7 +61,7 @@ public class ImageServiceImpl implements ImageService{
 
         String url = "https://d43d-124-55-57-87.ngrok-free.app//modify-image";  // FastAPI 서버의 URL
 
-        String requestBody = "{\"prompt\": \"" + prompt + "\", \"imageURL\": " + imageURL  + "\", \"seed\": " + seed + "}";
+        String requestBody = "{\"prompt\": \"" + prompt + "\", \"imageURL\": " + imageURL  + ", \"seed\": " + seed + "}";
 
         HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
 

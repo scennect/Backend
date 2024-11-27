@@ -1287,7 +1287,11 @@
         // 현재 마우스 좌표를 가져옴
         const x = event.clientX; // 마우스의 X 좌표
         const y = event.clientY; // 마우스의 Y 좌표
+<<<<<<< HEAD
         const seed = false;
+=======
+        let seed = false;
+>>>>>>> cb0105c (#75 Refactor: static 수정)
 
         const nodeData = {
             prompt: prompt,
@@ -1534,7 +1538,11 @@
 
     function GenImg2Img(target, parentId){
 
+<<<<<<< HEAD
         const seed = target.parentElement.parentElement.querySelector('.form-check-input').value;
+=======
+        let seed = target.parentElement.parentElement.querySelector('.form-check-input').value;
+>>>>>>> cb0105c (#75 Refactor: static 수정)
         if(seed == "on"){
             seed = true;
         }else{
