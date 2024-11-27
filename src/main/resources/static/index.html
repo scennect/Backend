@@ -1535,11 +1535,7 @@
     function GenImg2Img(target, parentId){
 
         let seed = target.parentElement.parentElement.querySelector('.form-check-input').checked;
-        if(seed == "on"){
-            seed = true;
-        }else{
-            seed = false;
-        }
+        
 
 
         console.log("GenImg2Img", target, parentId, seed, typeof seed);
