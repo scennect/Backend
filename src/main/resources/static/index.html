@@ -250,13 +250,26 @@
   </div>
 
 
-
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
 
 
 
 <script>
+
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+
+
+    // 페이지 로드 후 모든 툴팁 초기화
+  document.addEventListener('DOMContentLoaded', function () {
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+  });
+
 
     // 페이지 로드 시 노드 생성 폼 드래그 가능하게 설정
     window.onload = function() {    
@@ -528,37 +541,37 @@
 
 
 
-    /// BackGround Dragging
-    // const background = document.getElementById('background');
-    // let isDragging = false;
-    // let startX, startY, scrollLeft, scrollTop;
+    // BackGround Dragging
+    const background = document.getElementById('background');
+    let isDragging = false;
+    let startX, startY, scrollLeft, scrollTop;
 
-    // background.addEventListener('mousedown', (e) => {
-    //     isDragging = true;
-    //     background.style.cursor = 'grabbing';
-    //     startX = e.pageX - background.offsetLeft;
-    //     startY = e.pageY - background.offsetTop;
-    //     scrollLeft = window.scrollX;
-    //     scrollTop = window.scrollY;
-    // });
+    background.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        background.style.cursor = 'grabbing';
+        startX = e.pageX - background.offsetLeft;
+        startY = e.pageY - background.offsetTop;
+        scrollLeft = window.scrollX;
+        scrollTop = window.scrollY;
+    });
 
-    // background.addEventListener('mouseleave', () => {
-    //     isDragging = false;
-    //     background.style.cursor = 'grab';
-    // });
+    background.addEventListener('mouseleave', () => {
+        isDragging = false;
+        background.style.cursor = 'grab';
+    });
 
-    // background.addEventListener('mouseup', () => {
-    //     isDragging = false;
-    //     background.style.cursor = 'grab';
-    // });
+    background.addEventListener('mouseup', () => {
+        isDragging = false;
+        background.style.cursor = 'grab';
+    });
 
-    // background.addEventListener('mousemove', (e) => {
-    //     if (!isDragging) return;
-    //     e.preventDefault();
-    //     const x = e.pageX - startX;
-    //     const y = e.pageY - startY;
-    //     window.scrollTo(scrollLeft - x, scrollTop - y);
-    // });
+    background.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const x = e.pageX - startX;
+        const y = e.pageY - startY;
+        window.scrollTo(scrollLeft - x, scrollTop - y);
+    });
 
 
 
@@ -1260,6 +1273,7 @@
     //     }
     // }
 
+
     ////////////////////////////////////////////////////////////////////////
     // txt2img 및 노드 생성 폼 처리
     ////////////////////////////////////////////////////////////////////////
@@ -1273,13 +1287,15 @@
         // 현재 마우스 좌표를 가져옴
         const x = event.clientX; // 마우스의 X 좌표
         const y = event.clientY; // 마우스의 Y 좌표
+        const seed = false;
 
         const nodeData = {
             prompt: prompt,
             parentNodeId: null,
             projectId: projectId,
             x: x, // X 좌표 추가
-            y: y  // Y 좌표 추가
+            y: y,  // Y 좌표 추가
+            seed: seed
         };
 
         try {
@@ -1467,6 +1483,29 @@
                     <div class="plus"><i>+</i></div>
                     <label for="prompt">Add Prompt</label>
                     <textarea type="text" class=" form-control" placeholder="Add additional Prompts to Fix IMG"></textarea>
+
+
+                    <div class="form-check form-switch">
+
+                        <label for="correction">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#00aeff" class="bi bi-info-circle" viewBox="0 0 16 16">
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
+                            </svg>
+                            <span>Seed Fixation</span>
+                            
+                        </label>
+
+                        <input class="form-check-input" type="checkbox" role="switch" id="correction" checked>
+
+
+                        <div class="tip" role="tooltip">
+                            When this element is checked, the seed value is fixed, generating results that are as similar as possible to the previous image.
+                        </div>
+
+                    </div>
+
+
                 </form>
                 <div class="action">
                     <button onclick="GenImg2Img(this, ${parentNodeId})" type="button" class="btn generateBtn btn-primary">Genenrate</button>
@@ -1494,7 +1533,16 @@
     
 
     function GenImg2Img(target, parentId){
-        console.log("GenImg2Img", target, parentId);
+
+        const seed = target.parentElement.parentElement.querySelector('.form-check-input').value;
+        if(seed == "on"){
+            seed = true;
+        }else{
+            seed = false;
+        }
+
+
+        console.log("GenImg2Img", target, parentId, seed, typeof seed);
         
         const projectId = CurrentProjectId;
         const parentNodeId = parentId;
@@ -1519,7 +1567,8 @@
             x: x, // X 좌표 추가
             y: y,  // Y 좌표 추가
             parentNodeId: parentNodeId,
-            projectId: projectId
+            projectId: projectId,
+            seed: seed
         };
         console.log(currentNode, nodeData)
 

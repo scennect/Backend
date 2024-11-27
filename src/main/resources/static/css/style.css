@@ -50,7 +50,6 @@ body, html {
   border-radius: 50%; /* 원형으로 만들기 */
   pointer-events: none; /* 클릭 이벤트 차단 */
   z-index: 1000; /* 다른 요소 위에 표시 */
-  transition: transform 0.1s linear;
 }
 .cursor span {
   position: relative;
@@ -300,6 +299,7 @@ input:hover, textarea:hover {
   background-color: rgba(0, 0, 0, 0.3);
   border-radius: 0;
   border: none;
+  font-size: 0.9rem;
   color: #00aeff;
   transition: 0.2s ease-in;
 }
@@ -471,6 +471,7 @@ input:hover, textarea:hover {
 .node-box.before {
   border: 2px solid #00aeff;
   min-width: 240px;
+  overflow: visible;
 }
 .node-box:hover {
   border: 1px solid #00aeff;
@@ -549,6 +550,54 @@ input:hover, textarea:hover {
   font-size: 2rem;
   font-style: normal;
   color: #00aeff;
+}
+.node-box .node-func form .form-switch {
+  padding: 0.25rem 0.25rem 0 !important;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: space-between;
+}
+.node-box .node-func form .form-switch label {
+  margin-top: 0.3rem;
+}
+.node-box .node-func form .form-switch label span {
+  margin-top: 0.15rem;
+  margin-left: 0.1rem;
+  font-size: 0.85rem;
+}
+.node-box .node-func form .form-switch .form-check-input {
+  zoom: 1.4;
+}
+.node-box .node-func form .form-switch .form-check-input:checked {
+  background-color: #0d6efd !important;
+  border-color: #0d6efd;
+}
+.node-box .node-func form .form-switch .tip {
+  margin: 0 0.25rem 0 1rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.65);
+  cursor: pointer;
+  position: absolute;
+  left: 228px;
+  margin-top: 0.5rem;
+  background-color: rgba(0, 0, 0, 0.5);
+  width: 200px;
+  -webkit-backdrop-filter: blur(16px);
+          backdrop-filter: blur(16px);
+  transition: 0.25s ease-in;
+  opacity: 0;
+}
+.node-box .node-func form .form-switch:hover {
+  transition: 0.25s ease-out;
+  opacity: 1;
+}
+.node-box .node-func form .form-switch:hover .tip {
+  transition: 0.25s ease-out;
+  opacity: 1;
 }
 .node-box .node-func .action {
   display: flex;
@@ -714,4 +763,9 @@ input:hover, textarea:hover {
 #ImgExpandModal .modal-content .modal-footer .btnGroup .btn:first-of-type {
   margin: 0;
   margin-bottom: 0.75rem;
+}
+
+.custom-tooltip {
+  --bs-tooltip-bg: var(--bd-violet-bg);
+  --bs-tooltip-color: var(--bs-white);
 }/*# sourceMappingURL=style.css.map */
