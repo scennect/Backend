@@ -448,6 +448,7 @@ input, textarea{
                             border-radius: 0;
                             border: none;
                             // border-left: 1px solid rgba(255, 255, 255, 0.15);
+                            font-size: 0.9rem;
                             color: $pointColor;
 
                             transition: 0.2s ease-in;
@@ -645,6 +646,7 @@ input, textarea{
     &.before{
         border: 2px solid $pointColor;
         min-width: 240px;
+        overflow: visible;
     }
 
 
@@ -719,6 +721,9 @@ input, textarea{
         }
     }
     .node-func{
+
+        
+
         &.hide{
             display: none;
         }
@@ -728,7 +733,7 @@ input, textarea{
             margin-bottom: 0.5rem;
             width: 100%;
     
-    
+            
     
             p{
                 font-size: 0.5rem;
@@ -760,7 +765,67 @@ input, textarea{
                 }
             }
 
+            .form-switch{
+                padding: 0.25rem 0.25rem 0 !important;
 
+                display: flex;
+                flex-direction: row;
+                width: 100%;
+                justify-content: space-between;
+
+                label{
+                    margin-top: 0.3rem;
+                    span{
+                        margin-top: 0.15rem;
+                        margin-left: 0.1rem;
+                        font-size: 0.85rem;
+                        // color: $pointColor;
+                    }
+                }
+
+                .form-check-input{
+                    zoom: 1.4;
+                }
+                .form-check-input:checked {
+                    background-color: #0d6efd !important;
+                    border-color: #0d6efd;
+                }
+                
+                .tip{
+                    margin: 0 0.25rem 0 1rem;
+                    padding: 0.5rem 0.75rem;
+    
+                    border-radius: 0.5rem;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+    
+                    font-size: 0.75rem;
+                    color: rgba(255,255,255,0.65);
+    
+                    cursor: pointer;
+
+
+
+                    position: absolute;
+                    left: 228px;
+                    margin-top: 0.5rem;
+                    background-color: rgba(0, 0, 0, 0.5);
+                    width: 200px;
+                    backdrop-filter: blur(16px);
+
+    
+                    transition: 0.25s ease-in;
+                    opacity: 0;
+    
+                }
+                &:hover{
+                    .tip{
+                        transition: 0.25s ease-out;
+                        opacity: 1;
+                    }
+                    transition: 0.25s ease-out;
+                    opacity: 1;
+                }
+            }
             
         }
         .action{
@@ -986,3 +1051,10 @@ input, textarea{
     }
     
 }
+
+
+
+.custom-tooltip {
+    --bs-tooltip-bg: var(--bd-violet-bg);
+    --bs-tooltip-color: var(--bs-white);
+  }
