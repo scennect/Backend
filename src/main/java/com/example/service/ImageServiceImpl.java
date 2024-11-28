@@ -35,7 +35,7 @@ public class ImageServiceImpl implements ImageService{
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        String url = "https://d43d-124-55-57-87.ngrok-free.app//generate-image";  // FastAPI 서버의 URL
+        String url = "https://3324-124-55-57-87.ngrok-free.app//generate-image";  // FastAPI 서버의 URL
 
         String requestBody = "{\"prompt\": \"" + prompt + "\"}";
 
@@ -59,7 +59,7 @@ public class ImageServiceImpl implements ImageService{
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        String url = "https://d43d-124-55-57-87.ngrok-free.app//modify-image";  // FastAPI 서버의 URL
+        String url = "https://3324-124-55-57-87.ngrok-free.app//modify-image";  // FastAPI 서버의 URL
 
         String requestBody = "{\"prompt\": \"" + prompt + "\", \"imageURL\": " + imageURL  + "\", \"seed\": " + seed + "}";
 
