@@ -1287,7 +1287,7 @@
         // 현재 마우스 좌표를 가져옴
         const x = event.clientX; // 마우스의 X 좌표
         const y = event.clientY; // 마우스의 Y 좌표
-        const seed = false;
+        let seed = false;
 
         const nodeData = {
             prompt: prompt,
@@ -1534,12 +1534,8 @@
 
     function GenImg2Img(target, parentId){
 
-        const seed = target.parentElement.parentElement.querySelector('.form-check-input').value;
-        if(seed == "on"){
-            seed = true;
-        }else{
-            seed = false;
-        }
+        let seed = target.parentElement.parentElement.querySelector('.form-check-input').checked;
+        
 
 
         console.log("GenImg2Img", target, parentId, seed, typeof seed);
